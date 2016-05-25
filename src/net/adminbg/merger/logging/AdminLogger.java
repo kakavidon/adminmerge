@@ -53,5 +53,12 @@ public enum AdminLogger {
 	public void error(final String message, final Throwable throwable ) {
 		logger.log(Level.SEVERE,message, throwable);
 	}
+	
+	public void error(final String message) {
+		logger.log(Level.SEVERE,message);
+	}	
+	public void error(final String message, final Exception ex ) {
+		logger.log(Level.SEVERE,message, ex);
+	}
 
 }

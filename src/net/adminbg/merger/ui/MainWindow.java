@@ -1,15 +1,6 @@
 package net.adminbg.merger.ui;
 
-import static net.adminbg.merger.ui.Configuration.BTN_EXIT;
-import static net.adminbg.merger.ui.Configuration.BTN_MERGE;
-import static net.adminbg.merger.ui.Configuration.BTN_OPEN;
-import static net.adminbg.merger.ui.Configuration.CANCEL_FILE_SELECTION;
-import static net.adminbg.merger.ui.Configuration.FILE_READ_ERROR_CAPTION;
-import static net.adminbg.merger.ui.Configuration.LBL_SHOP;
-import static net.adminbg.merger.ui.Configuration.LBL_STORE;
-import static net.adminbg.merger.ui.Configuration.NEW_LINE;
-import static net.adminbg.merger.ui.Configuration.TEXTAREA_LOG_MESSAGE_STORE;
-import static net.adminbg.merger.ui.Configuration.UI_STYLE;
+import static net.adminbg.merger.ui.Configuration.*;
 
 import java.awt.Dimension;
 import java.awt.Toolkit;
@@ -173,9 +164,11 @@ public class MainWindow extends javax.swing.JFrame {
 
 	private void btnStoreActionPerformed(java.awt.event.ActionEvent evt) {
 		final JFileChooser fileChooser = new JFileChooser();
+		fileChooser.setCurrentDirectory(new File(DEFAULT_SOURCE_DIR));
 		int returnVal = fileChooser.showOpenDialog(this);
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			File file = fileChooser.getSelectedFile();
+
 			final String fileName = file.getAbsolutePath();
 			txtStore.setText(fileName);
 			txtStore.setEnabled(false);
@@ -192,6 +185,7 @@ public class MainWindow extends javax.swing.JFrame {
 	private void btnShopActionPerformed(java.awt.event.ActionEvent evt) {
 
 		final JFileChooser fileChooser = new JFileChooser();
+		fileChooser.setCurrentDirectory(new File(DEFAULT_SOURCE_DIR));
 		final int returnVal = fileChooser.showOpenDialog(this);
 
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -199,11 +193,10 @@ public class MainWindow extends javax.swing.JFrame {
 			final String fileName = file.getAbsolutePath();
 			txtShop.setText(fileName);
 			txtShop.setEnabled(false);
-			String message = TEXTAREA_LOG_MESSAGE_STORE + fileName + NEW_LINE;
+			String message = TEXTAREA_LOG_MESSAGE_SHOP + fileName + NEW_LINE;
 			textAreaOutput.append(message);
 			logger.info(message);
 		} else {
-			// System.out.println(Messages.getString(CANCEL_FILE_SELECTION));
 			logger.info(CANCEL_FILE_SELECTION);
 		}
 	}
