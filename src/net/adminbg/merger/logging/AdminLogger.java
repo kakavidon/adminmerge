@@ -17,20 +17,10 @@ public enum AdminLogger {
 
 	private static SimpleFormatter formatterTxt;
 
-	static {
-
-		try {
-			init();
-		} catch (SecurityException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-
-			e.printStackTrace();
-		}
-	}
-
-	private static void init() throws SecurityException, IOException {
-
+	public void init(final String className) throws SecurityException, IOException {
+		
+		logger = Logger.getLogger(className); 
+		
 		Boolean isDevelopment = Boolean.valueOf(IS_DEVELOPMENT);
 		if (!isDevelopment) {
 			Logger rootLogger = Logger.getLogger("");
@@ -44,7 +34,7 @@ public enum AdminLogger {
 		}
 		
 		logger.setLevel(Level.INFO);
-		fileTxt = new FileHandler("../logs/adminmere.log");
+		fileTxt = new FileHandler("./logs/adminmere.log");
 		// create a TXT formatter
 		formatterTxt = new SimpleFormatter();
 		fileTxt.setFormatter(formatterTxt);

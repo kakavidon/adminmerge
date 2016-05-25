@@ -1,17 +1,26 @@
 package net.adminbg.merger.ui;
 
-import net.adminbg.merger.MergeManger;
-import net.adminbg.merger.logging.AdminLogger;
+import static net.adminbg.merger.ui.Configuration.BTN_EXIT;
+import static net.adminbg.merger.ui.Configuration.BTN_MERGE;
+import static net.adminbg.merger.ui.Configuration.BTN_OPEN;
+import static net.adminbg.merger.ui.Configuration.CANCEL_FILE_SELECTION;
+import static net.adminbg.merger.ui.Configuration.FILE_READ_ERROR_CAPTION;
+import static net.adminbg.merger.ui.Configuration.LBL_SHOP;
+import static net.adminbg.merger.ui.Configuration.LBL_STORE;
+import static net.adminbg.merger.ui.Configuration.NEW_LINE;
+import static net.adminbg.merger.ui.Configuration.TEXTAREA_LOG_MESSAGE_STORE;
+import static net.adminbg.merger.ui.Configuration.UI_STYLE;
 
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.io.File;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import static java.util.logging.Level.*;
-import static net.adminbg.merger.ui.Configuration.*;
+import java.io.IOException;
+
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+
+import net.adminbg.merger.MergeManger;
+import net.adminbg.merger.logging.AdminLogger;
 
 /**
  * 
@@ -21,23 +30,30 @@ public class MainWindow extends javax.swing.JFrame {
 
 	private static final long serialVersionUID = 5745764792431031785L;
 	private final MergeManger mergeManger;
-	
-	private static AdminLogger logger = AdminLogger.INSTANCE;
 
+	private static AdminLogger logger = AdminLogger.INSTANCE;
 
 	/**
 	 * Creates new form MainFarame
 	 */
 	public MainWindow() {
 		logger.info("Running Main Window constructor...");
-		AdminLogger instance = AdminLogger.INSTANCE;
 		mergeManger = MergeManger.getInstance();
-		instance.info("Ali abli");
+
 		initComponents();
 	}
 
 	private void initComponents() {
-
+		try {
+			logger.init(MainWindow.class.getName());
+		} catch (SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		logger.info("Running Main Window constructor...");
 		txtShop = new javax.swing.JTextField();
 		txtStore = new javax.swing.JTextField();
 		btnShop = new javax.swing.JButton();
@@ -56,29 +72,25 @@ public class MainWindow extends javax.swing.JFrame {
 
 		txtStore.setFocusable(false);
 
-		
-		btnShop.setText(BTN_OPEN); 
+		btnShop.setText(BTN_OPEN);
 		btnShop.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				btnShopActionPerformed(evt);
 			}
 		});
 
-		btnStore.setText(BTN_OPEN); 
+		btnStore.setText(BTN_OPEN);
 		btnStore.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				btnStoreActionPerformed(evt);
 			}
 		});
 
-
 		lblStore.setText(LBL_SHOP);
 
-		
 		lblShop.setText(LBL_STORE);
 
-	
-		btnMerge.setText(BTN_MERGE); 
+		btnMerge.setText(BTN_MERGE);
 		btnMerge.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				btnMergeActionPerformed(evt);
@@ -89,8 +101,7 @@ public class MainWindow extends javax.swing.JFrame {
 		textAreaOutput.setRows(5);
 		textAreaOutput.setFocusable(false);
 		jScrollPane1.setViewportView(textAreaOutput);
-       
-		 
+
 		btnExit.setText(BTN_EXIT);
 		btnExit.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -98,132 +109,64 @@ public class MainWindow extends javax.swing.JFrame {
 			}
 		});
 
-		javax.swing.GroupLayout layout = new javax.swing.GroupLayout(
-				getContentPane());
+		javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
 		getContentPane().setLayout(layout);
-		layout.setHorizontalGroup(layout
-				.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-				.addGroup(
-						layout.createSequentialGroup()
-								.addGap(15, 15, 15)
-								.addGroup(
-										layout.createParallelGroup(
-												javax.swing.GroupLayout.Alignment.LEADING,
-												false)
-												.addGroup(
-														layout.createSequentialGroup()
-																.addGroup(
-																		layout.createParallelGroup(
-																				javax.swing.GroupLayout.Alignment.LEADING,
-																				false)
-																				.addComponent(
-																						lblShop)
-																				.addComponent(
-																						lblStore)
-																				.addComponent(
-																						txtStore,
-																						javax.swing.GroupLayout.DEFAULT_SIZE,
-																						383,
-																						Short.MAX_VALUE)
-																				.addComponent(
-																						txtShop))
-																.addPreferredGap(
-																		javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-																.addGroup(
-																		layout.createParallelGroup(
-																				javax.swing.GroupLayout.Alignment.LEADING)
-																				.addComponent(
-																						btnShop,
-																						javax.swing.GroupLayout.PREFERRED_SIZE,
-																						27,
-																						javax.swing.GroupLayout.PREFERRED_SIZE)
-																				.addComponent(
-																						btnStore,
-																						javax.swing.GroupLayout.PREFERRED_SIZE,
-																						27,
-																						javax.swing.GroupLayout.PREFERRED_SIZE)))
-												.addComponent(jScrollPane1)
-												.addComponent(
-														btnMerge,
-														javax.swing.GroupLayout.Alignment.TRAILING))
-								.addContainerGap(
-										javax.swing.GroupLayout.DEFAULT_SIZE,
-										Short.MAX_VALUE))
-				.addGroup(
-						javax.swing.GroupLayout.Alignment.TRAILING,
-						layout.createSequentialGroup()
-								.addContainerGap(
-										javax.swing.GroupLayout.DEFAULT_SIZE,
-										Short.MAX_VALUE)
-								.addComponent(btnExit,
-										javax.swing.GroupLayout.PREFERRED_SIZE,
-										62,
-										javax.swing.GroupLayout.PREFERRED_SIZE)
-								.addContainerGap()));
-		layout.setVerticalGroup(layout
-				.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-				.addGroup(
-						layout.createSequentialGroup()
-								.addContainerGap()
-								.addComponent(lblShop,
-										javax.swing.GroupLayout.PREFERRED_SIZE,
-										23,
-										javax.swing.GroupLayout.PREFERRED_SIZE)
-								.addPreferredGap(
-										javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-								.addGroup(
-										layout.createParallelGroup(
-												javax.swing.GroupLayout.Alignment.BASELINE)
-												.addComponent(
-														txtShop,
-														javax.swing.GroupLayout.PREFERRED_SIZE,
-														javax.swing.GroupLayout.DEFAULT_SIZE,
-														javax.swing.GroupLayout.PREFERRED_SIZE)
-												.addComponent(btnShop))
-								.addPreferredGap(
-										javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-								.addComponent(lblStore)
-								.addPreferredGap(
-										javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-								.addGroup(
-										layout.createParallelGroup(
-												javax.swing.GroupLayout.Alignment.BASELINE)
-												.addComponent(
-														txtStore,
-														javax.swing.GroupLayout.PREFERRED_SIZE,
-														javax.swing.GroupLayout.DEFAULT_SIZE,
-														javax.swing.GroupLayout.PREFERRED_SIZE)
-												.addComponent(btnStore))
-								.addGap(18, 18, 18)
-								.addComponent(btnMerge)
-								.addPreferredGap(
-										javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-								.addComponent(jScrollPane1,
-										javax.swing.GroupLayout.DEFAULT_SIZE,
-										131, Short.MAX_VALUE)
-								.addPreferredGap(
-										javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-								.addComponent(btnExit).addContainerGap()));
+		layout.setHorizontalGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+				.addGroup(layout.createSequentialGroup().addGap(15, 15, 15).addGroup(layout
+						.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING,
+								false)
+						.addGroup(layout.createSequentialGroup()
+								.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+										.addComponent(lblShop).addComponent(lblStore)
+										.addComponent(txtStore, javax.swing.GroupLayout.DEFAULT_SIZE, 383,
+												Short.MAX_VALUE)
+										.addComponent(txtShop))
+								.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+								.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+										.addComponent(btnShop, javax.swing.GroupLayout.PREFERRED_SIZE, 27,
+												javax.swing.GroupLayout.PREFERRED_SIZE)
+										.addComponent(btnStore, javax.swing.GroupLayout.PREFERRED_SIZE, 27,
+												javax.swing.GroupLayout.PREFERRED_SIZE)))
+						.addComponent(jScrollPane1).addComponent(btnMerge, javax.swing.GroupLayout.Alignment.TRAILING))
+				.addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+				.addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+						.addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE).addComponent(btnExit,
+								javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)
+						.addContainerGap()));
+		layout.setVerticalGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+				.addGroup(layout.createSequentialGroup().addContainerGap()
+						.addComponent(lblShop, javax.swing.GroupLayout.PREFERRED_SIZE, 23,
+								javax.swing.GroupLayout.PREFERRED_SIZE)
+						.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+						.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+								.addComponent(txtShop, javax.swing.GroupLayout.PREFERRED_SIZE,
+										javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+						.addComponent(btnShop)).addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+				.addComponent(lblStore).addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+				.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+						.addComponent(txtStore, javax.swing.GroupLayout.PREFERRED_SIZE,
+								javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+						.addComponent(btnStore)).addGap(18, 18, 18).addComponent(btnMerge)
+				.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+				.addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 131, Short.MAX_VALUE)
+				.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED).addComponent(btnExit)
+				.addContainerGap()));
 
 		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-		this.setLocation(dim.width / 3 - this.getSize().width / 2, dim.height
-				/ 3 - this.getSize().height / 2);
+		this.setLocation(dim.width / 3 - this.getSize().width / 2, dim.height / 3 - this.getSize().height / 2);
 		pack();
 	}
 
 	private void btnMergeActionPerformed(java.awt.event.ActionEvent evt) {
-		
+
 		final String shopFile = txtShop.getText();
 		final String storeFile = txtStore.getText();
-		
+
 		try {
 			mergeManger.merge(shopFile, storeFile);
 		} catch (IllegalArgumentException ex) {
-		
-			JOptionPane.showMessageDialog(this,
-		     					          ex.getMessage(),
-		     					          FILE_READ_ERROR_CAPTION, 
-			     				          JOptionPane.ERROR_MESSAGE);
+
+			JOptionPane.showMessageDialog(this, ex.getMessage(), FILE_READ_ERROR_CAPTION, JOptionPane.ERROR_MESSAGE);
 		}
 
 	}
@@ -236,26 +179,31 @@ public class MainWindow extends javax.swing.JFrame {
 			final String fileName = file.getAbsolutePath();
 			txtStore.setText(fileName);
 			txtStore.setEnabled(false);
-			textAreaOutput.append(TEXTAREA_LOG_MESSAGE_STORE + fileName + NEW_LINE); 
+			String message = TEXTAREA_LOG_MESSAGE_STORE + fileName + NEW_LINE;
+			textAreaOutput.append(message);
+			logger.info(message);
+
 		} else {
-			//System.out.println(Messages.getString(CANCEL_FILE_SELECTION));
+			// System.out.println(Messages.getString(CANCEL_FILE_SELECTION));
 			logger.info(CANCEL_FILE_SELECTION);
 		}
 	}
 
 	private void btnShopActionPerformed(java.awt.event.ActionEvent evt) {
-		
+
 		final JFileChooser fileChooser = new JFileChooser();
 		final int returnVal = fileChooser.showOpenDialog(this);
-		
+
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			File file = fileChooser.getSelectedFile();
 			final String fileName = file.getAbsolutePath();
 			txtShop.setText(fileName);
 			txtShop.setEnabled(false);
-			textAreaOutput.append(TEXTAREA_LOG_MESSAGE_STORE + fileName + NEW_LINE); 
+			String message = TEXTAREA_LOG_MESSAGE_STORE + fileName + NEW_LINE;
+			textAreaOutput.append(message);
+			logger.info(message);
 		} else {
-			//System.out.println(Messages.getString(CANCEL_FILE_SELECTION));
+			// System.out.println(Messages.getString(CANCEL_FILE_SELECTION));
 			logger.info(CANCEL_FILE_SELECTION);
 		}
 	}
@@ -267,7 +215,7 @@ public class MainWindow extends javax.swing.JFrame {
 	}
 
 	public static void start() {
-		
+
 		try {
 			for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
 				if (UI_STYLE.equals(info.getName())) {
