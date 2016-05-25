@@ -16,6 +16,7 @@ public enum Configuration {
 	public final static String TEXTAREA_LOG_MESSAGE_SHOP;
 	public final static String TEXTAREA_LOG_MESSAGE_STORE;
 	public final static String UI_STYLE;
+	public final static String IS_DEVELOPMENT;
 
 	static {
 		BTN_EXIT = Messages.getString("MainWindow.btn.exit");
@@ -29,6 +30,7 @@ public enum Configuration {
 		TEXTAREA_LOG_MESSAGE_SHOP = Messages.getString("MainWindow.textarea.log.message.shop");
 		TEXTAREA_LOG_MESSAGE_STORE = Messages.getString("MainWindow.textarea.log.message.store");
 		UI_STYLE = Messages.getString("MainWindow.ui.style");
+		IS_DEVELOPMENT = Messages.getString("AdminLogger.is.development");
 	}
 
 

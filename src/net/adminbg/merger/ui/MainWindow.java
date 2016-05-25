@@ -22,7 +22,7 @@ public class MainWindow extends javax.swing.JFrame {
 	private static final long serialVersionUID = 5745764792431031785L;
 	private final MergeManger mergeManger;
 	
-	 private final static Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private static AdminLogger logger = AdminLogger.INSTANCE;
 
 
 	/**
@@ -30,9 +30,6 @@ public class MainWindow extends javax.swing.JFrame {
 	 */
 	public MainWindow() {
 		logger.info("Running Main Window constructor...");
-		logger.setLevel(Level.SEVERE);
-
-		logger.severe("Info Log");
 		AdminLogger instance = AdminLogger.INSTANCE;
 		mergeManger = MergeManger.getInstance();
 		instance.info("Ali abli");
@@ -279,13 +276,13 @@ public class MainWindow extends javax.swing.JFrame {
 				}
 			}
 		} catch (ClassNotFoundException ex) {
-			logger.log(SEVERE, null, ex);
+			logger.error(null, ex);
 		} catch (InstantiationException ex) {
-			logger.log(SEVERE, null, ex);
+			logger.error(null, ex);
 		} catch (IllegalAccessException ex) {
-			logger.log(SEVERE, null, ex);
+			logger.error(null, ex);
 		} catch (javax.swing.UnsupportedLookAndFeelException ex) {
-			logger.log(SEVERE, null, ex);
+			logger.error(null, ex);
 		}
 
 		/* Create and display the form */
