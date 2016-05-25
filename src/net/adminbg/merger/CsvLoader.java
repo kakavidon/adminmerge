@@ -1,20 +1,18 @@
 package net.adminbg.merger;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
+import java.io.InputStreamReader;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.sql.Types;
-
-import javax.swing.event.RowSorterListener;
-
+import static net.adminbg.merger.ui.Configuration.*;
 import org.h2.tools.Csv;
 import org.h2.tools.SimpleResultSet;
 
@@ -43,7 +41,7 @@ public class CsvLoader implements Loader {
 			throw ex;
 		}
 		try {
-			pop(fileName, fileName + "_new", 2);
+			readTextFile(fileName, fileName + "_new", 2);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -127,11 +125,12 @@ public class CsvLoader implements Loader {
 		int j = 0;
 		while (rs.next()) {
 			Object[] row = new Object[columnCount];
-			
-			if (rowsToSkip <= j) {
+
+			if (rowsToSkip >= j) {
+				j++;
 				continue;
 			}
-			j++;
+
 			for (int i = 0; i < columnCount; i++) {
 				String s = rs.getString(1 + i);
 				row[i] = s;
@@ -143,5 +142,27 @@ public class CsvLoader implements Loader {
 		csv = new Csv();
 		csv.setLineSeparator("\n");
 		csv.write(writer, rs2);
+	}
+
+	public void readTextFile(String fileName, String out, int skipLines) throws IOException {
+
+		FileInputStream fStream = new FileInputStream(fileName);
+		DataInputStream in = new DataInputStream(fStream);
+		BufferedReader br = new BufferedReader(new InputStreamReader(in));
+		BufferedWriter writer = new BufferedWriter(new FileWriter(out));
+		String readLine;
+		int curLineNr = 1;
+
+		while ((readLine = br.readLine()) != null) {
+			if (curLineNr++ <= skipLines) {
+				continue;
+			}
+
+			writer.write(readLine + NEW_LINE);
+		}
+
+		in.close();
+		writer.close();
+
 	}
 }
