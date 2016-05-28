@@ -11,12 +11,13 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.SQLException;
+import java.util.logging.Logger;
 
 import net.adminbg.merger.logging.AdminLogger;
 
 public class CsvLoader implements Loader {
 
-	final AdminLogger logger = AdminLogger.INSTANCE;
+	private static final Log ger logger = Logger.getLogger(DBManager.class.getName());
 
 	@Override
 	public void read(final String fileName) throws SQLException, IllegalArgumentException {
