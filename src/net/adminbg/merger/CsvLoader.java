@@ -11,13 +11,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.SQLException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import net.adminbg.merger.logging.AdminLogger;
 
 public class CsvLoader implements Loader {
 
-	private static final Log ger logger = Logger.getLogger(DBManager.class.getName());
+	private static final Logger logger = Logger.getLogger(DBManager.class.getName());
 
 	@Override
 	public void read(final String fileName) throws SQLException, IllegalArgumentException {
@@ -26,7 +25,7 @@ public class CsvLoader implements Loader {
 		if (fileName == null || fileName.equals("")) {
 			final String message = "File name should not be empty";
 			IllegalArgumentException ex = new IllegalArgumentException(message);
-			logger.error(message, ex);
+			logger.log(Level.SEVERE,message, ex);
 			throw ex;
 		}
 
@@ -34,7 +33,7 @@ public class CsvLoader implements Loader {
 		if (!file.exists() || !file.canRead()) {
 			final String message = "File \"" + fileName + "\" is invalid.";
 			IllegalArgumentException ex = new IllegalArgumentException(message);
-			logger.error(message, ex);
+			logger.log(Level.SEVERE,message, ex);
 			throw ex;
 		}
 		try {
