@@ -5,12 +5,13 @@
  */
 package net.adminbg.merger;
 
+import static net.adminbg.merger.ui.Configuration.SHOP_FILE_READER;
+
 import java.io.File;
-import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import net.adminbg.merger.logging.AdminLogger;
-
-import static net.adminbg.merger.ui.Configuration.*;
 
 /**
  * 
@@ -19,25 +20,15 @@ import static net.adminbg.merger.ui.Configuration.*;
 public enum MergeManger {
 	INSTANCE;
 
-	final static AdminLogger logger = AdminLogger.INSTANCE;
+	private static Logger logger = AdminLogger.INSTANCE.getLogger(MergeManger.class.getName());
 
-	public static MergeManger getInstance() {
-		try {
-			logger.init(MergeManger.class.getName());
-		} catch (SecurityException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return INSTANCE;
-	}
 
 	public void close() {
 
 	}
 
 	public void merge(final String firstFileName, final String secondFileName) throws IllegalArgumentException {
-		logger.info("net.adminbg.merger.MergeManger  merge() "); 
+
 		logger.info("\"firstFileName\" ="+firstFileName); 
 		logger.info("\"secondFileName\"="+secondFileName); 
 		
@@ -68,7 +59,7 @@ public enum MergeManger {
 				loader.read(fileName);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
-				logger.error("Could not find Loader class.", e);
+				logger.log(Level.SEVERE,"Could not find Loader class.", e);
 			}
 
 		}

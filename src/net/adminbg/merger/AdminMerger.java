@@ -9,6 +9,7 @@ import net.adminbg.merger.ui.MainWindow;
  * @author lachezar.nedelchev
  */
 public class AdminMerger {
+	
 	private static final Logger logger = Logger.getLogger(AdminMerger.class.getName());
 
 	/**
@@ -17,8 +18,9 @@ public class AdminMerger {
 	 */
 	public static void main(String[] args) {
 		
+		logger.info("Starting application");
 		
-		
+		logger.info("Starting main window");
 		MainWindow.start();
 		
 	}

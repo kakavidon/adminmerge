@@ -1,5 +1,9 @@
 package net.adminbg.merger.ui;
 
+import java.util.logging.Logger;
+
+import net.adminbg.merger.logging.AdminLogger;
+
 
 public enum Configuration {
 	
@@ -20,7 +24,9 @@ public enum Configuration {
 	public final static String SHOP_FILE_READER; 
 	public final static String STORE_FILE_READER;
 	public final static String DEFAULT_SOURCE_DIR;
-
+	
+	private static Logger logger = AdminLogger.INSTANCE.getLogger(Configuration.class.getName());	
+	
 	static {
 		BTN_EXIT = Messages.getString("MainWindow.btn.exit");
 		BTN_MERGE = Messages.getString("MainWindow.btn.merge");
@@ -37,6 +43,16 @@ public enum Configuration {
 		SHOP_FILE_READER = Messages.getString("shop.file.loader");
 		STORE_FILE_READER  = Messages.getString("store.file.loader");
 		DEFAULT_SOURCE_DIR = Messages.getString("default.source.dir");
+		
+		
+		logger.info(BTN_EXIT);
+		logger.info(BTN_MERGE);
+		logger.info(BTN_OPEN);
+		logger.info(CANCEL_FILE_SELECTION);
+		logger.info(FILE_READ_ERROR_CAPTION);
+		logger.info(LBL_STORE);
+		logger.info(LBL_SHOP);
+		logger.info(NEW_LINE);
 	}
 
 

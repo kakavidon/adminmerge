@@ -1,11 +1,23 @@
 package net.adminbg.merger.ui;
 
-import static net.adminbg.merger.ui.Configuration.*;
+import static net.adminbg.merger.ui.Configuration.BTN_EXIT;
+import static net.adminbg.merger.ui.Configuration.BTN_MERGE;
+import static net.adminbg.merger.ui.Configuration.BTN_OPEN;
+import static net.adminbg.merger.ui.Configuration.CANCEL_FILE_SELECTION;
+import static net.adminbg.merger.ui.Configuration.DEFAULT_SOURCE_DIR;
+import static net.adminbg.merger.ui.Configuration.FILE_READ_ERROR_CAPTION;
+import static net.adminbg.merger.ui.Configuration.LBL_SHOP;
+import static net.adminbg.merger.ui.Configuration.LBL_STORE;
+import static net.adminbg.merger.ui.Configuration.NEW_LINE;
+import static net.adminbg.merger.ui.Configuration.TEXTAREA_LOG_MESSAGE_SHOP;
+import static net.adminbg.merger.ui.Configuration.TEXTAREA_LOG_MESSAGE_STORE;
+import static net.adminbg.merger.ui.Configuration.UI_STYLE;
 
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.io.File;
-import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -22,28 +34,20 @@ public class MainWindow extends javax.swing.JFrame {
 	private static final long serialVersionUID = 5745764792431031785L;
 	private final MergeManger mergeManger;
 
-	private static AdminLogger logger = AdminLogger.INSTANCE;
+	private static Logger logger = AdminLogger.INSTANCE.getLogger(MainWindow.class.getName());
 
 	/**
 	 * Creates new form MainFarame
 	 */
 	public MainWindow() {
 		logger.info("Running Main Window constructor...");
-		mergeManger = MergeManger.getInstance();
+		mergeManger = MergeManger.INSTANCE;
 
 		initComponents();
 	}
 
 	private void initComponents() {
-		try {
-			logger.init(MainWindow.class.getName());
-		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	
 		logger.info("Running Main Window constructor...");
 		txtShop = new javax.swing.JTextField();
 		txtStore = new javax.swing.JTextField();
@@ -165,6 +169,7 @@ public class MainWindow extends javax.swing.JFrame {
 	private void btnStoreActionPerformed(java.awt.event.ActionEvent evt) {
 		final JFileChooser fileChooser = new JFileChooser();
 		fileChooser.setCurrentDirectory(new File(DEFAULT_SOURCE_DIR));
+		fileChooser.setFileSelectionMode( JFileChooser.DIRECTORIES_ONLY);
 		int returnVal = fileChooser.showOpenDialog(this);
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			File file = fileChooser.getSelectedFile();
@@ -186,6 +191,7 @@ public class MainWindow extends javax.swing.JFrame {
 
 		final JFileChooser fileChooser = new JFileChooser();
 		fileChooser.setCurrentDirectory(new File(DEFAULT_SOURCE_DIR));
+		fileChooser.setFileSelectionMode( JFileChooser.DIRECTORIES_ONLY);
 		final int returnVal = fileChooser.showOpenDialog(this);
 
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -217,13 +223,13 @@ public class MainWindow extends javax.swing.JFrame {
 				}
 			}
 		} catch (ClassNotFoundException ex) {
-			logger.error(null, ex);
+			logger.log(Level.SEVERE,"",  ex);
 		} catch (InstantiationException ex) {
-			logger.error(null, ex);
+			logger.log(Level.SEVERE,"",  ex);
 		} catch (IllegalAccessException ex) {
-			logger.error(null, ex);
+			logger.log(Level.SEVERE,"",  ex);
 		} catch (javax.swing.UnsupportedLookAndFeelException ex) {
-			logger.error(null, ex);
+			logger.log(Level.SEVERE,"",  ex);
 		}
 
 		/* Create and display the form */

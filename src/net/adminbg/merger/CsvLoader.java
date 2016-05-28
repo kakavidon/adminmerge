@@ -14,18 +14,21 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import net.adminbg.merger.logging.AdminLogger;
+
 public class CsvLoader implements Loader {
 
-	private static final Logger logger = Logger.getLogger(DBManager.class.getName());
+	private static Logger logger = AdminLogger.INSTANCE.getLogger(CsvLoader.class.getName());
 
 	@Override
-	public void read(final String fileName) throws SQLException, IllegalArgumentException {
+	public void read(final String fileName) throws SQLException,
+			IllegalArgumentException {
 
 		logger.info("Creating a new instance of net.adminbg.merger.ExcelReader");
 		if (fileName == null || fileName.equals("")) {
 			final String message = "File name should not be empty";
 			IllegalArgumentException ex = new IllegalArgumentException(message);
-			logger.log(Level.SEVERE,message, ex);
+			logger.log(Level.SEVERE, message, ex);
 			throw ex;
 		}
 
@@ -33,21 +36,20 @@ public class CsvLoader implements Loader {
 		if (!file.exists() || !file.canRead()) {
 			final String message = "File \"" + fileName + "\" is invalid.";
 			IllegalArgumentException ex = new IllegalArgumentException(message);
-			logger.log(Level.SEVERE,message, ex);
+
 			throw ex;
 		}
 		try {
 			readTextFile(fileName, fileName + "_new", 2);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.log(Level.SEVERE, "Failed to read file", e );
 		}
-		
+
 		final String sql = "create table test(id int ,name char(10));SELECT * FROM TEST";
 		try {
 			try {
 				DBManager.INSTANCE.connect();
-				DBManager.INSTANCE.runSQL(sql);
+				DBManager.INSTANCE.executeSQL(sql);
 
 			} catch (ClassNotFoundException e) {
 				// TODO Auto-generated catch block
@@ -59,7 +61,8 @@ public class CsvLoader implements Loader {
 
 	}
 
-	public void readTextFile(String fileName, String out, int skipLines) throws IOException {
+	public void readTextFile(String fileName, String out, int skipLines)
+			throws IOException {
 
 		FileInputStream fStream = new FileInputStream(fileName);
 		DataInputStream in = new DataInputStream(fStream);

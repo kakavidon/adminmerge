@@ -1,5 +1,7 @@
 package net.adminbg.merger.logging;
 
+import static net.adminbg.merger.ui.Configuration.IS_DEVELOPMENT;
+
 import java.io.IOException;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
@@ -7,19 +9,18 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
-import static net.adminbg.merger.ui.Configuration.*;
 
 public enum AdminLogger {
 	INSTANCE;
-	private static Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+
 
 	private static FileHandler fileTxt;
 
 	private static SimpleFormatter formatterTxt;
 
-	public void init(final String className) throws SecurityException, IOException {
+	public Logger getLogger(final String className)  {
 		
-		logger = Logger.getLogger(className); 
+		Logger logger = Logger.getLogger(className); 
 		
 		Boolean isDevelopment = Boolean.valueOf(IS_DEVELOPMENT);
 		if (!isDevelopment) {
@@ -34,31 +35,21 @@ public enum AdminLogger {
 		}
 		
 		logger.setLevel(Level.INFO);
-		fileTxt = new FileHandler("./logs/adminmere.log");
+		try {
+			fileTxt = new FileHandler("./logs/adminmere.log");
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		// create a TXT formatter
 		formatterTxt = new SimpleFormatter();
 		fileTxt.setFormatter(formatterTxt);
 		logger.addHandler(fileTxt);
+		return logger;
 
 	}
 
-	public void info(final String message) {
-		logger.info(message);
-	}
 
-	public void warning(final String message) {
-		logger.warning(message);
-	}
-	
-	public void error(final String message, final Throwable throwable ) {
-		logger.log(Level.SEVERE,message, throwable);
-	}
-	
-	public void error(final String message) {
-		logger.log(Level.SEVERE,message);
-	}	
-	public void error(final String message, final Exception ex ) {
-		logger.log(Level.SEVERE,message, ex);
-	}
 
 }
