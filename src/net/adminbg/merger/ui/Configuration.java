@@ -25,9 +25,10 @@ public enum Configuration {
 	public final static String STORE_FILE_READER;
 	public final static String DEFAULT_SOURCE_DIR;
 	
-	private static Logger logger = AdminLogger.INSTANCE.getLogger(Configuration.class.getName());	
+	private static Logger logger;	
 	
 	static {
+	
 		BTN_EXIT = Messages.getString("MainWindow.btn.exit");
 		BTN_MERGE = Messages.getString("MainWindow.btn.merge");
 		BTN_OPEN = Messages.getString("MainWindow.btn.open");
@@ -43,8 +44,13 @@ public enum Configuration {
 		SHOP_FILE_READER = Messages.getString("shop.file.loader");
 		STORE_FILE_READER  = Messages.getString("store.file.loader");
 		DEFAULT_SOURCE_DIR = Messages.getString("default.source.dir");
-		
-		
+
+	}
+
+
+
+	public static Configuration getInstance() {
+		logger = AdminLogger.INSTANCE.getLogger(Configuration.class.getName());	
 		logger.info(BTN_EXIT);
 		logger.info(BTN_MERGE);
 		logger.info(BTN_OPEN);
@@ -53,11 +59,6 @@ public enum Configuration {
 		logger.info(LBL_STORE);
 		logger.info(LBL_SHOP);
 		logger.info(NEW_LINE);
-	}
-
-
-
-	public static Configuration getInstance() {
 		return INSTANCE;
 	}
 }

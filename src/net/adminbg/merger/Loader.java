@@ -1,7 +1,11 @@
 package net.adminbg.merger;
 
+import java.nio.file.Path;
 import java.sql.SQLException;
 
 public interface Loader {
-	public void read(final String fileName) throws SQLException, IllegalArgumentException;
+	
+	public String getFileExtension();
+
+	public void load(final Path path) throws SQLException,IllegalArgumentException;
 }

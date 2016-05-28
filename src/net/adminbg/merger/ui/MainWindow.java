@@ -9,6 +9,8 @@ import static net.adminbg.merger.ui.Configuration.FILE_READ_ERROR_CAPTION;
 import static net.adminbg.merger.ui.Configuration.LBL_SHOP;
 import static net.adminbg.merger.ui.Configuration.LBL_STORE;
 import static net.adminbg.merger.ui.Configuration.NEW_LINE;
+import static net.adminbg.merger.ui.Configuration.SHOP_FILE_READER;
+import static net.adminbg.merger.ui.Configuration.STORE_FILE_READER;
 import static net.adminbg.merger.ui.Configuration.TEXTAREA_LOG_MESSAGE_SHOP;
 import static net.adminbg.merger.ui.Configuration.TEXTAREA_LOG_MESSAGE_STORE;
 import static net.adminbg.merger.ui.Configuration.UI_STYLE;
@@ -16,6 +18,8 @@ import static net.adminbg.merger.ui.Configuration.UI_STYLE;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.io.File;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -34,7 +38,8 @@ public class MainWindow extends javax.swing.JFrame {
 	private static final long serialVersionUID = 5745764792431031785L;
 	private final MergeManger mergeManger;
 
-	private static Logger logger = AdminLogger.INSTANCE.getLogger(MainWindow.class.getName());
+	private static Logger logger = AdminLogger.INSTANCE
+			.getLogger(MainWindow.class.getName());
 
 	/**
 	 * Creates new form MainFarame
@@ -47,7 +52,7 @@ public class MainWindow extends javax.swing.JFrame {
 	}
 
 	private void initComponents() {
-	
+
 		logger.info("Running Main Window constructor...");
 		txtShop = new javax.swing.JTextField();
 		txtStore = new javax.swing.JTextField();
@@ -104,63 +109,128 @@ public class MainWindow extends javax.swing.JFrame {
 			}
 		});
 
-		javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+		javax.swing.GroupLayout layout = new javax.swing.GroupLayout(
+				getContentPane());
 		getContentPane().setLayout(layout);
-		layout.setHorizontalGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-				.addGroup(layout.createSequentialGroup().addGap(15, 15, 15).addGroup(layout
-						.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING,
-								false)
-						.addGroup(layout.createSequentialGroup()
-								.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-										.addComponent(lblShop).addComponent(lblStore)
-										.addComponent(txtStore, javax.swing.GroupLayout.DEFAULT_SIZE, 383,
-												Short.MAX_VALUE)
-										.addComponent(txtShop))
-								.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-								.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-										.addComponent(btnShop, javax.swing.GroupLayout.PREFERRED_SIZE, 27,
-												javax.swing.GroupLayout.PREFERRED_SIZE)
-										.addComponent(btnStore, javax.swing.GroupLayout.PREFERRED_SIZE, 27,
-												javax.swing.GroupLayout.PREFERRED_SIZE)))
-						.addComponent(jScrollPane1).addComponent(btnMerge, javax.swing.GroupLayout.Alignment.TRAILING))
-				.addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-				.addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-						.addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE).addComponent(btnExit,
-								javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)
-						.addContainerGap()));
-		layout.setVerticalGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-				.addGroup(layout.createSequentialGroup().addContainerGap()
-						.addComponent(lblShop, javax.swing.GroupLayout.PREFERRED_SIZE, 23,
-								javax.swing.GroupLayout.PREFERRED_SIZE)
-						.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-						.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-								.addComponent(txtShop, javax.swing.GroupLayout.PREFERRED_SIZE,
-										javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-						.addComponent(btnShop)).addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-				.addComponent(lblStore).addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-				.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-						.addComponent(txtStore, javax.swing.GroupLayout.PREFERRED_SIZE,
-								javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-						.addComponent(btnStore)).addGap(18, 18, 18).addComponent(btnMerge)
-				.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-				.addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 131, Short.MAX_VALUE)
-				.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED).addComponent(btnExit)
-				.addContainerGap()));
+		layout.setHorizontalGroup(layout
+				.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+				.addGroup(
+						layout.createSequentialGroup()
+								.addGap(15, 15, 15)
+								.addGroup(
+										layout.createParallelGroup(
+												javax.swing.GroupLayout.Alignment.LEADING,
+												false)
+												.addGroup(
+														layout.createSequentialGroup()
+																.addGroup(
+																		layout.createParallelGroup(
+																				javax.swing.GroupLayout.Alignment.LEADING,
+																				false)
+																				.addComponent(
+																						lblShop)
+																				.addComponent(
+																						lblStore)
+																				.addComponent(
+																						txtStore,
+																						javax.swing.GroupLayout.DEFAULT_SIZE,
+																						383,
+																						Short.MAX_VALUE)
+																				.addComponent(
+																						txtShop))
+																.addPreferredGap(
+																		javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+																.addGroup(
+																		layout.createParallelGroup(
+																				javax.swing.GroupLayout.Alignment.LEADING)
+																				.addComponent(
+																						btnShop,
+																						javax.swing.GroupLayout.PREFERRED_SIZE,
+																						27,
+																						javax.swing.GroupLayout.PREFERRED_SIZE)
+																				.addComponent(
+																						btnStore,
+																						javax.swing.GroupLayout.PREFERRED_SIZE,
+																						27,
+																						javax.swing.GroupLayout.PREFERRED_SIZE)))
+												.addComponent(jScrollPane1)
+												.addComponent(
+														btnMerge,
+														javax.swing.GroupLayout.Alignment.TRAILING))
+								.addContainerGap(
+										javax.swing.GroupLayout.DEFAULT_SIZE,
+										Short.MAX_VALUE))
+				.addGroup(
+						javax.swing.GroupLayout.Alignment.TRAILING,
+						layout.createSequentialGroup()
+								.addContainerGap(
+										javax.swing.GroupLayout.DEFAULT_SIZE,
+										Short.MAX_VALUE)
+								.addComponent(btnExit,
+										javax.swing.GroupLayout.PREFERRED_SIZE,
+										62,
+										javax.swing.GroupLayout.PREFERRED_SIZE)
+								.addContainerGap()));
+		layout.setVerticalGroup(layout
+				.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+				.addGroup(
+						layout.createSequentialGroup()
+								.addContainerGap()
+								.addComponent(lblShop,
+										javax.swing.GroupLayout.PREFERRED_SIZE,
+										23,
+										javax.swing.GroupLayout.PREFERRED_SIZE)
+								.addPreferredGap(
+										javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+								.addGroup(
+										layout.createParallelGroup(
+												javax.swing.GroupLayout.Alignment.BASELINE)
+												.addComponent(
+														txtShop,
+														javax.swing.GroupLayout.PREFERRED_SIZE,
+														javax.swing.GroupLayout.DEFAULT_SIZE,
+														javax.swing.GroupLayout.PREFERRED_SIZE)
+												.addComponent(btnShop))
+								.addPreferredGap(
+										javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+								.addComponent(lblStore)
+								.addPreferredGap(
+										javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+								.addGroup(
+										layout.createParallelGroup(
+												javax.swing.GroupLayout.Alignment.BASELINE)
+												.addComponent(
+														txtStore,
+														javax.swing.GroupLayout.PREFERRED_SIZE,
+														javax.swing.GroupLayout.DEFAULT_SIZE,
+														javax.swing.GroupLayout.PREFERRED_SIZE)
+												.addComponent(btnStore))
+								.addGap(18, 18, 18)
+								.addComponent(btnMerge)
+								.addPreferredGap(
+										javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+								.addComponent(jScrollPane1,
+										javax.swing.GroupLayout.DEFAULT_SIZE,
+										131, Short.MAX_VALUE)
+								.addPreferredGap(
+										javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+								.addComponent(btnExit).addContainerGap()));
 
 		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-		this.setLocation(dim.width / 3 - this.getSize().width / 2, dim.height / 3 - this.getSize().height / 2);
+		this.setLocation(dim.width / 3 - this.getSize().width / 2, dim.height
+				/ 3 - this.getSize().height / 2);
 		pack();
 	}
 
 	private void btnMergeActionPerformed(java.awt.event.ActionEvent evt) {
-
+		Map<String, String> loaderMapping = new TreeMap<String, String>();
 		final String shopFile = txtShop.getText();
 		final String storeFile = txtStore.getText();
-
+		loaderMapping.put(shopFile, SHOP_FILE_READER);
+		loaderMapping.put(storeFile, STORE_FILE_READER);
 		try {
-			mergeManger.merge(shopFile, storeFile);
+			mergeManger.merge(loaderMapping);
 		} catch (IllegalArgumentException ex) {
-
 			JOptionPane.showMessageDialog(this, ex.getMessage(), FILE_READ_ERROR_CAPTION, JOptionPane.ERROR_MESSAGE);
 		}
 
@@ -169,40 +239,40 @@ public class MainWindow extends javax.swing.JFrame {
 	private void btnStoreActionPerformed(java.awt.event.ActionEvent evt) {
 		final JFileChooser fileChooser = new JFileChooser();
 		fileChooser.setCurrentDirectory(new File(DEFAULT_SOURCE_DIR));
-		fileChooser.setFileSelectionMode( JFileChooser.DIRECTORIES_ONLY);
+		fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		final int returnVal = fileChooser.showOpenDialog(this);
+
+		if (returnVal == JFileChooser.APPROVE_OPTION) {
+			File file = fileChooser.getSelectedFile();
+			final String fileName = file.getAbsolutePath();
+			txtStore.setText(fileName);
+			txtStore.setEnabled(false);			
+			String message = TEXTAREA_LOG_MESSAGE_SHOP + fileName + NEW_LINE;
+			textAreaOutput.append(message);
+			logger.info(message);
+		} else {
+			logger.info(CANCEL_FILE_SELECTION);
+		}
+	}
+// TODO the button actions are inverted somehow
+	private void btnShopActionPerformed(java.awt.event.ActionEvent evt) {
+
+		
+		final JFileChooser fileChooser = new JFileChooser();
+		fileChooser.setCurrentDirectory(new File(DEFAULT_SOURCE_DIR));
+		fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		int returnVal = fileChooser.showOpenDialog(this);
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			File file = fileChooser.getSelectedFile();
-
 			final String fileName = file.getAbsolutePath();
-			txtStore.setText(fileName);
-			txtStore.setEnabled(false);
+			txtShop.setText(fileName);
+			txtShop.setEnabled(false);
 			String message = TEXTAREA_LOG_MESSAGE_STORE + fileName + NEW_LINE;
 			textAreaOutput.append(message);
 			logger.info(message);
 
 		} else {
 			// System.out.println(Messages.getString(CANCEL_FILE_SELECTION));
-			logger.info(CANCEL_FILE_SELECTION);
-		}
-	}
-
-	private void btnShopActionPerformed(java.awt.event.ActionEvent evt) {
-
-		final JFileChooser fileChooser = new JFileChooser();
-		fileChooser.setCurrentDirectory(new File(DEFAULT_SOURCE_DIR));
-		fileChooser.setFileSelectionMode( JFileChooser.DIRECTORIES_ONLY);
-		final int returnVal = fileChooser.showOpenDialog(this);
-
-		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			File file = fileChooser.getSelectedFile();
-			final String fileName = file.getAbsolutePath();
-			txtShop.setText(fileName);
-			txtShop.setEnabled(false);
-			String message = TEXTAREA_LOG_MESSAGE_SHOP + fileName + NEW_LINE;
-			textAreaOutput.append(message);
-			logger.info(message);
-		} else {
 			logger.info(CANCEL_FILE_SELECTION);
 		}
 	}
@@ -216,20 +286,21 @@ public class MainWindow extends javax.swing.JFrame {
 	public static void start() {
 
 		try {
-			for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+			for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager
+					.getInstalledLookAndFeels()) {
 				if (UI_STYLE.equals(info.getName())) {
 					javax.swing.UIManager.setLookAndFeel(info.getClassName());
 					break;
 				}
 			}
 		} catch (ClassNotFoundException ex) {
-			logger.log(Level.SEVERE,"",  ex);
+			logger.log(Level.SEVERE, "", ex);
 		} catch (InstantiationException ex) {
-			logger.log(Level.SEVERE,"",  ex);
+			logger.log(Level.SEVERE, "", ex);
 		} catch (IllegalAccessException ex) {
-			logger.log(Level.SEVERE,"",  ex);
+			logger.log(Level.SEVERE, "", ex);
 		} catch (javax.swing.UnsupportedLookAndFeelException ex) {
-			logger.log(Level.SEVERE,"",  ex);
+			logger.log(Level.SEVERE, "", ex);
 		}
 
 		/* Create and display the form */

@@ -5,9 +5,14 @@
  */
 package net.adminbg.merger;
 
-import static net.adminbg.merger.ui.Configuration.SHOP_FILE_READER;
+import static net.adminbg.merger.ui.Configuration.*;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.sql.SQLException;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -20,50 +25,61 @@ import net.adminbg.merger.logging.AdminLogger;
 public enum MergeManger {
 	INSTANCE;
 
-	private static Logger logger = AdminLogger.INSTANCE.getLogger(MergeManger.class.getName());
-
+	private final Logger logger = AdminLogger.INSTANCE
+			.getLogger("net.adminbg.merger.MergeManger");
 
 	public void close() {
 
+		try {
+			DBManager.INSTANCE.disconnect();
+		} catch (SQLException e) {
+			logger.log(Level.SEVERE,
+					"Could not close connection to database .", e);
+		}
+
 	}
 
-	public void merge(final String firstFileName, final String secondFileName) throws IllegalArgumentException {
-
-		logger.info("\"firstFileName\" ="+firstFileName); 
-		logger.info("\"secondFileName\"="+secondFileName); 
+	public void merge(final Map<String, String> loaderMapping)
+	
+			throws IllegalArgumentException {
+		final String errorMessage = "Could not open \"%s\".";
 		
-		File firstFile = new File(firstFileName);
-		File secondFile = new File(secondFileName);
-		final String errorMessage = "Could not open %s file \"%s\".";
+        for (String dirName : loaderMapping.keySet()){
+    		logger.info("\"firstDirName\" =" + dirName);
+    		Path path = Paths.get(dirName);
+    		if (!Files.exists(path, LinkOption.NOFOLLOW_LINKS) || !Files.isReadable(path) || !Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) {
+    			final String msg = String.format(errorMessage, dirName);
+    			throw new IllegalArgumentException(msg);
+    		}
+    		load(path, loaderMapping.get(dirName));
+        }
 
-		if (!firstFile.exists() || !firstFile.canRead()) {
-			final String msg = String.format(errorMessage, "first", firstFile);
-			throw new IllegalArgumentException(msg);
-		}
 
-		if (!secondFile.exists() || !secondFile.canRead()) {
-			final String msg = String.format(errorMessage, "second", secondFile);
-			throw new IllegalArgumentException(msg);
-		}
-		getLoaderAndRead(firstFileName);
+
+		
 
 	}
 
-	private void getLoaderAndRead(final String fileName) {
-
-		if (fileName.toUpperCase().contains(".CSV")) {
-			try {
-				Class<?> forName = Class.forName(SHOP_FILE_READER);
-
-				Loader loader = (Loader) forName.newInstance();
-				loader.read(fileName);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				logger.log(Level.SEVERE,"Could not find Loader class.", e);
-			}
-
+	private void load(final Path path, final String loaderClass) {
+		String pathName = path.toString();
+		logger.info(pathName);
+		Loader loader = null;
+		try {
+			Class<?> forName = Class.forName(loaderClass);
+			loader = (Loader) forName.newInstance();
+		} catch (Exception e) {
+			logger.log(Level.SEVERE, "Could not find Loader class.", e);
 		}
+		if (loader != null) {
+			try {
+				loader.load(path);
+			} catch (IllegalArgumentException e) {
+				logger.log(Level.SEVERE, "Invalid argument.", e);
+			} catch (SQLException e) {
+				logger.log(Level.SEVERE, "Invalis SQL statement.", e);
 
+			}
+		}
 	}
 
 }

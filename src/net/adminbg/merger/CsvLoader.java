@@ -1,73 +1,98 @@
 package net.adminbg.merger;
 
-import static net.adminbg.merger.ui.Configuration.NEW_LINE;
+import static net.adminbg.merger.ui.Configuration.*;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.nio.channels.FileChannel;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.OpenOption;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.sql.SQLException;
+import java.util.Iterator;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
+
+import static java.nio.file.StandardOpenOption.*;
 
 import net.adminbg.merger.logging.AdminLogger;
 
 public class CsvLoader implements Loader {
+	private final static String FILE_EXTENSION = "*.{csv}";
 
-	private static Logger logger = AdminLogger.INSTANCE.getLogger(CsvLoader.class.getName());
+	private static Logger logger = AdminLogger.INSTANCE
+			.getLogger(CsvLoader.class.getName());
 
 	@Override
-	public void read(final String fileName) throws SQLException,
+	public void load(final Path dirPath) throws SQLException,
 			IllegalArgumentException {
 
-		logger.info("Creating a new instance of net.adminbg.merger.ExcelReader");
-		if (fileName == null || fileName.equals("")) {
-			final String message = "File name should not be empty";
+		logger.info("Reading directory: ");
+
+		if (dirPath == null) {
+			final String message = "Directory name should not be null";
 			IllegalArgumentException ex = new IllegalArgumentException(message);
 			logger.log(Level.SEVERE, message, ex);
 			throw ex;
 		}
 
-		File file = new File(fileName);
-		if (!file.exists() || !file.canRead()) {
-			final String message = "File \"" + fileName + "\" is invalid.";
-			IllegalArgumentException ex = new IllegalArgumentException(message);
+		final Path tmpPathName = Paths
+				.get(DEFAULT_SOURCE_DIR + "/tmp/_new.csv");
 
-			throw ex;
-		}
+		DirectoryStream<Path> stream;
 		try {
-			readTextFile(fileName, fileName + "_new", 2);
-		} catch (Exception e) {
-			logger.log(Level.SEVERE, "Failed to read file", e );
-		}
+			stream = Files.newDirectoryStream(dirPath, getFileExtension());
 
-		final String sql = "create table test(id int ,name char(10));SELECT * FROM TEST";
-		try {
-			try {
-				DBManager.INSTANCE.connect();
-				DBManager.INSTANCE.executeSQL(sql);
-
-			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			for (Path path : stream) {
+				logger.info("Appending file  : "
+						+ path.getFileName().toString());
+				appendFile(path, tmpPathName, 2);
 			}
-		} finally {
-			DBManager.INSTANCE.disconnect();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
+
+		// final String sql = "SELECT * FROM TEST";
+
+		// DBManager.INSTANCE.executeSQL(sql);
 
 	}
 
-	public void readTextFile(String fileName, String out, int skipLines)
-			throws IOException {
+	public void appendFile(final Path sourcePath, final Path targetPath,
+			final int skipLines) throws IOException {
+		
+		InputStreamReader r = new InputStreamReader(new FileInputStream(sourcePath.toString()), StandardCharsets.UTF_8);
+		OutputStreamWriter w = new OutputStreamWriter(new FileOutputStream(targetPath.toString(),true), StandardCharsets.UTF_8);
+//		try (FileChannel in = FileChannel.open(sourcePath, READ);
+//				FileChannel out = FileChannel.open(targetPath, WRITE,
+//						CREATE, APPEND)) {
+//			long size = in.size(), trans = out.transferFrom(in, 0, size);
+//			for (long p = trans; p < size && trans > 0; p += trans){
+//				trans = out.transferFrom(in, p, size - p);
+//			}
+//		}
+//
+		BufferedWriter writer = new BufferedWriter(w);
+		BufferedReader br = new BufferedReader(r);
 
-		FileInputStream fStream = new FileInputStream(fileName);
-		DataInputStream in = new DataInputStream(fStream);
-		BufferedReader br = new BufferedReader(new InputStreamReader(in));
-		BufferedWriter writer = new BufferedWriter(new FileWriter(out));
 		String readLine;
 		int curLineNr = 1;
 
@@ -77,10 +102,15 @@ public class CsvLoader implements Loader {
 			}
 
 			writer.write(readLine + NEW_LINE);
+
 		}
 
-		in.close();
 		writer.close();
 
+	}
+
+	@Override
+	public String getFileExtension() {
+		return FILE_EXTENSION;
 	}
 }
