@@ -37,15 +37,12 @@ import net.adminbg.merger.logging.AdminLogger;
 
 public class CsvLoader implements Loader {
 	private final static String FILE_EXTENSION = "*.{csv}";
-
-	private static Logger logger = AdminLogger.INSTANCE
-			.getLogger(CsvLoader.class.getName());
+	private static Logger logger = AdminLogger.INSTANCE.getLogger(CsvLoader.class.getName());
 
 	@Override
-	public void load(final Path dirPath) throws SQLException,
-			IllegalArgumentException {
+	public void load(final Path dirPath) throws SQLException, IllegalArgumentException {
 
-		logger.info("Reading directory: ");
+		logger.info("Reading directory:" + dirPath);
 
 		if (dirPath == null) {
 			final String message = "Directory name should not be null";
@@ -54,16 +51,14 @@ public class CsvLoader implements Loader {
 			throw ex;
 		}
 
-		final Path tmpPathName = Paths
-				.get(DEFAULT_SOURCE_DIR + "/tmp/_new.csv");
+		final Path tmpPathName = Paths.get(DEFAULT_SOURCE_DIR + "\\_new.csv");
 
 		DirectoryStream<Path> stream;
 		try {
 			stream = Files.newDirectoryStream(dirPath, getFileExtension());
 
 			for (Path path : stream) {
-				logger.info("Appending file  : "
-						+ path.getFileName().toString());
+				logger.info("Appending file  : " + path.getFileName().toString());
 				appendFile(path, tmpPathName, 2);
 			}
 		} catch (IOException e) {
@@ -76,37 +71,30 @@ public class CsvLoader implements Loader {
 
 	}
 
-	public void appendFile(final Path sourcePath, final Path targetPath,
-			final int skipLines) throws IOException {
-		
-		InputStreamReader r = new InputStreamReader(new FileInputStream(sourcePath.toString()), StandardCharsets.UTF_8);
-		OutputStreamWriter w = new OutputStreamWriter(new FileOutputStream(targetPath.toString(),true), StandardCharsets.UTF_8);
-//		try (FileChannel in = FileChannel.open(sourcePath, READ);
-//				FileChannel out = FileChannel.open(targetPath, WRITE,
-//						CREATE, APPEND)) {
-//			long size = in.size(), trans = out.transferFrom(in, 0, size);
-//			for (long p = trans; p < size && trans > 0; p += trans){
-//				trans = out.transferFrom(in, p, size - p);
-//			}
-//		}
-//
-		BufferedWriter writer = new BufferedWriter(w);
-		BufferedReader br = new BufferedReader(r);
+	public void appendFile(final Path sourcePath, final Path targetPath, final int skipLines) throws IOException {
+		final FileInputStream fis = new FileInputStream(sourcePath.toString());
+		final InputStreamReader r = new InputStreamReader(fis, StandardCharsets.UTF_8);
+		final FileOutputStream fos = new FileOutputStream(targetPath.toString(), true);
+		final OutputStreamWriter w = new OutputStreamWriter(fos, StandardCharsets.UTF_8);
+		final BufferedWriter writer = new BufferedWriter(w);
+		final BufferedReader br = new BufferedReader(r);
+		try {
 
-		String readLine;
-		int curLineNr = 1;
+			String readLine;
+			int curLineNr = 1;
 
-		while ((readLine = br.readLine()) != null) {
-			if (curLineNr++ <= skipLines) {
-				continue;
+			while ((readLine = br.readLine()) != null) {
+				if (curLineNr++ <= skipLines) {
+					continue;
+				}
+
+				writer.write(readLine + NEW_LINE);
+
 			}
-
-			writer.write(readLine + NEW_LINE);
-
+		} finally {
+			writer.close();
+			br.close();
 		}
-
-		writer.close();
-
 	}
 
 	@Override

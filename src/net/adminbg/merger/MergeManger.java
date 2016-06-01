@@ -39,13 +39,11 @@ public enum MergeManger {
 
 	}
 
-	public void merge(final Map<String, String> loaderMapping)
-	
-			throws IllegalArgumentException {
+	public void merge(final Map<String, String> loaderMapping) throws IllegalArgumentException {
 		final String errorMessage = "Could not open \"%s\".";
 		
         for (String dirName : loaderMapping.keySet()){
-    		logger.info("\"firstDirName\" =" + dirName);
+    		logger.info("\"Dir Name\" =" + dirName);
     		Path path = Paths.get(dirName);
     		if (!Files.exists(path, LinkOption.NOFOLLOW_LINKS) || !Files.isReadable(path) || !Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) {
     			final String msg = String.format(errorMessage, dirName);

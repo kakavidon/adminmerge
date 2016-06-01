@@ -21,7 +21,7 @@ public class ExcelReader extends CsvLoader{
 	public void load(Path dirPath) throws SQLException,
 			IllegalArgumentException {
 
-
+		logger.info("AAAAA");
 	}
 	
 	

@@ -223,11 +223,6 @@ public class MainWindow extends javax.swing.JFrame {
 	}
 
 	private void btnMergeActionPerformed(java.awt.event.ActionEvent evt) {
-		Map<String, String> loaderMapping = new TreeMap<String, String>();
-		final String shopFile = txtShop.getText();
-		final String storeFile = txtStore.getText();
-		loaderMapping.put(shopFile, SHOP_FILE_READER);
-		loaderMapping.put(storeFile, STORE_FILE_READER);
 		try {
 			mergeManger.merge(loaderMapping);
 		} catch (IllegalArgumentException ex) {
@@ -237,7 +232,7 @@ public class MainWindow extends javax.swing.JFrame {
 	}
 
 	private void btnStoreActionPerformed(java.awt.event.ActionEvent evt) {
-		final JFileChooser fileChooser = new JFileChooser();
+		final JFileChooser fileChooser = new JFileChooser(new File(DEFAULT_SOURCE_DIR));
 		fileChooser.setCurrentDirectory(new File(DEFAULT_SOURCE_DIR));
 		fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		final int returnVal = fileChooser.showOpenDialog(this);
@@ -245,7 +240,8 @@ public class MainWindow extends javax.swing.JFrame {
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			File file = fileChooser.getSelectedFile();
 			final String fileName = file.getAbsolutePath();
-			txtStore.setText(fileName);
+	
+			loaderMapping.put(fileName, SHOP_FILE_READER);
 			txtStore.setEnabled(false);			
 			String message = TEXTAREA_LOG_MESSAGE_SHOP + fileName + NEW_LINE;
 			textAreaOutput.append(message);
@@ -258,13 +254,14 @@ public class MainWindow extends javax.swing.JFrame {
 	private void btnShopActionPerformed(java.awt.event.ActionEvent evt) {
 
 		
-		final JFileChooser fileChooser = new JFileChooser();
+		final JFileChooser fileChooser = new JFileChooser(new File(DEFAULT_SOURCE_DIR));
 		fileChooser.setCurrentDirectory(new File(DEFAULT_SOURCE_DIR));
 		fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		int returnVal = fileChooser.showOpenDialog(this);
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			File file = fileChooser.getSelectedFile();
 			final String fileName = file.getAbsolutePath();
+			loaderMapping.put(fileName, STORE_FILE_READER);
 			txtShop.setText(fileName);
 			txtShop.setEnabled(false);
 			String message = TEXTAREA_LOG_MESSAGE_STORE + fileName + NEW_LINE;
@@ -323,4 +320,5 @@ public class MainWindow extends javax.swing.JFrame {
 	private javax.swing.JTextField txtShop;
 	private javax.swing.JTextField txtStore;
 	// End of variables declaration
+	private Map<String, String> loaderMapping = new TreeMap<String, String>();
 }
