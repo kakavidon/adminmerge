@@ -24,7 +24,12 @@ public enum Configuration {
 	public final static String SHOP_FILE_READER; 
 	public final static String STORE_FILE_READER;
 	public final static String DEFAULT_SOURCE_DIR;
-	
+	public final static String DB_JDBC_URL;
+	public final static String DB_JDBC_DRIVER;
+	public final static String DB_JDBC_MAX_CONNECTIONS;
+	public final static String STORE_TABLE_NAME;
+	public final static String STORE_TABLE_COLUMNS;
+	public final static String STORE_TABLE_COLUMN_TYPES;
 	private static Logger logger;	
 	
 	static {
@@ -44,7 +49,12 @@ public enum Configuration {
 		SHOP_FILE_READER = Messages.getString("shop.file.loader");
 		STORE_FILE_READER  = Messages.getString("store.file.loader");
 		DEFAULT_SOURCE_DIR = Messages.getString("default.source.dir");
-
+		DB_JDBC_URL = Messages.getString("db.jdbc.url");
+		DB_JDBC_DRIVER  = Messages.getString("db.jdbc.driver");
+		DB_JDBC_MAX_CONNECTIONS  = Messages.getString("db.jdbc.max.connections");
+		STORE_TABLE_NAME  = Messages.getString("store.table.name");
+		STORE_TABLE_COLUMNS  = Messages.getString("store.table.columns");
+		STORE_TABLE_COLUMN_TYPES  = Messages.getString("store.table.column.types");
 	}
 
 

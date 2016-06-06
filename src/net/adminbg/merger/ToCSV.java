@@ -26,6 +26,10 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -36,6 +40,11 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+
+import net.adminbg.merger.io.CSVImporter;
+import net.adminbg.merger.io.ImportException;
+import net.adminbg.merger.io.Importer;
+import net.adminbg.merger.io.InvalidFileException;
 
 /**
 * Demonstrates <em>one</em> way to convert an Excel spreadsheet into a CSV
@@ -652,6 +661,33 @@ public class ToCSV {
   *        user when running the program from the command prompt.
   */
  public static void main(String[] args) {
+	 final DBManager1 instance = DBManager1.getInstance();
+	 instance.start();
+	 Importer i = new CSVImporter();
+	 try {
+		i.importFiles(Paths.get("C:\\Users\\Lachezar.Nedelchev\\git\\adminmerge\\store"));
+	} catch (InvalidFileException e1) {
+		// TODO Auto-generated catch block
+		e1.printStackTrace();
+	} catch (ImportException e) {
+
+		e.printStackTrace();
+	}
+	 try {
+		final Connection connection = instance.getConnection();
+
+		final ResultSet tables = connection.getMetaData().getTables(null, null, "CATALOGS", new String []{"SYSTEM TABLE"});
+		
+		while (tables.next()) {
+			final String string = tables.getString(1);
+			System.out.println(string + ":" + tables.getString(2)+ ":" + tables.getString(3)+ ":" + tables.getString(4)+ ":" + tables.getString(5));
+		}
+		 instance.dispose();		
+	} catch (SQLException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+
      // Check the number of arguments passed to the main method. There
      // must be two, three or four; the name of and path to either the folder
      // containing the Excel files or an individual Excel workbook that is/are
@@ -669,71 +705,71 @@ public class ToCSV {
      // with matching names but different extensions - Test.xls and Test.xlsx
      // for example - then the CSV file generated from one will overwrite
      // that generated from the other.
-     ToCSV converter = null;
-     boolean converted = true;
-     long startTime = System.currentTimeMillis();
-     try {
-         converter = new ToCSV();
-         if(args.length == 2) {
-             // Just the Source File/Folder and Destination Folder were
-             // passed to the main method.
-             converter.convertExcelToCSV(args[0], args[1]);
-         }
-         else if(args.length == 3){
-             // The Source File/Folder, Destination Folder and Separator
-             // were passed to the main method.
-             converter.convertExcelToCSV(args[0], args[1], args[2]);
-         }
-         else if(args.length == 4) {
-             // The Source File/Folder, Destination Folder, Separator and
-             // Formatting Convnetion were passed to the main method.
-             converter.convertExcelToCSV(args[0], args[1],
-                                         args[2], Integer.parseInt(args[3]));
-         }
-         else {
-             // None or more than four parameters were passed so display
-             //a Usage message.
-             System.out.println("Usage: java ToCSV [Source File/Folder] " +
-                 "[Destination Folder] [Separator] [Formatting Convention]\n" +
-                 "\tSource File/Folder\tThis argument should contain the name of and\n" +
-                 "\t\t\t\tpath to either a single Excel workbook or a\n" +
-                 "\t\t\t\tfolder containing one or more Excel workbooks.\n" +
-                 "\tDestination Folder\tThe name of and path to the folder that the\n" +
-                 "\t\t\t\tCSV files should be written out into. The\n" +
-                 "\t\t\t\tfolder must exist before running the ToCSV\n" +
-                 "\t\t\t\tcode as it will not check for or create it.\n" +
-                 "\tSeparator\t\tOptional. The character or characters that\n" +
-                 "\t\t\t\tshould be used to separate fields in the CSV\n" +
-                 "\t\t\t\trecord. If no value is passed then the comma\n" +
-                 "\t\t\t\twill be assumed.\n" +
-                 "\tFormatting Convention\tOptional. This argument can take one of two\n" +
-                 "\t\t\t\tvalues. Passing 0 (zero) will result in a CSV\n" +
-                 "\t\t\t\tfile that obeys Excel's formatting conventions\n" +
-                 "\t\t\t\twhilst passing 1 (one) will result in a file\n" +
-                 "\t\t\t\tthat obeys UNIX formatting conventions. If no\n" +
-                 "\t\t\t\tvalue is passed, then the CSV file produced\n" +
-                 "\t\t\t\twill obey Excel's formatting conventions.");
-             converted = false;
-         }
-     }
-     // It is not wise to have such a wide catch clause - Exception is very
-     // close to being at the top of the inheritance hierarchy - though it
-     // will suffice for this example as it is really not possible to recover
-     // easilly from an exceptional set of circumstances at this point in the
-     // program. It should however, ideally be replaced with one or more
-     // catch clauses optimised to handle more specific problems.
-     catch(Exception ex) {
-         System.out.println("Caught an: " + ex.getClass().getName());
-         System.out.println("Message: " + ex.getMessage());
-         System.out.println("Stacktrace follows:.....");
-         ex.printStackTrace(System.out);
-         converted = false;
-     }
-     
-     if (converted) {
-         System.out.println("Conversion took " + 
-               (int)((System.currentTimeMillis() - startTime)/1000) + " seconds");
-     }
+//     ToCSV converter = null;
+//     boolean converted = true;
+//     long startTime = System.currentTimeMillis();
+//     try {
+//         converter = new ToCSV();
+//         if(args.length == 2) {
+//             // Just the Source File/Folder and Destination Folder were
+//             // passed to the main method.
+//             converter.convertExcelToCSV(args[0], args[1]);
+//         }
+//         else if(args.length == 3){
+//             // The Source File/Folder, Destination Folder and Separator
+//             // were passed to the main method.
+//             converter.convertExcelToCSV(args[0], args[1], args[2]);
+//         }
+//         else if(args.length == 4) {
+//             // The Source File/Folder, Destination Folder, Separator and
+//             // Formatting Convnetion were passed to the main method.
+//             converter.convertExcelToCSV(args[0], args[1],
+//                                         args[2], Integer.parseInt(args[3]));
+//         }
+//         else {
+//             // None or more than four parameters were passed so display
+//             //a Usage message.
+//             System.out.println("Usage: java ToCSV [Source File/Folder] " +
+//                 "[Destination Folder] [Separator] [Formatting Convention]\n" +
+//                 "\tSource File/Folder\tThis argument should contain the name of and\n" +
+//                 "\t\t\t\tpath to either a single Excel workbook or a\n" +
+//                 "\t\t\t\tfolder containing one or more Excel workbooks.\n" +
+//                 "\tDestination Folder\tThe name of and path to the folder that the\n" +
+//                 "\t\t\t\tCSV files should be written out into. The\n" +
+//                 "\t\t\t\tfolder must exist before running the ToCSV\n" +
+//                 "\t\t\t\tcode as it will not check for or create it.\n" +
+//                 "\tSeparator\t\tOptional. The character or characters that\n" +
+//                 "\t\t\t\tshould be used to separate fields in the CSV\n" +
+//                 "\t\t\t\trecord. If no value is passed then the comma\n" +
+//                 "\t\t\t\twill be assumed.\n" +
+//                 "\tFormatting Convention\tOptional. This argument can take one of two\n" +
+//                 "\t\t\t\tvalues. Passing 0 (zero) will result in a CSV\n" +
+//                 "\t\t\t\tfile that obeys Excel's formatting conventions\n" +
+//                 "\t\t\t\twhilst passing 1 (one) will result in a file\n" +
+//                 "\t\t\t\tthat obeys UNIX formatting conventions. If no\n" +
+//                 "\t\t\t\tvalue is passed, then the CSV file produced\n" +
+//                 "\t\t\t\twill obey Excel's formatting conventions.");
+//             converted = false;
+//         }
+//     }
+//     // It is not wise to have such a wide catch clause - Exception is very
+//     // close to being at the top of the inheritance hierarchy - though it
+//     // will suffice for this example as it is really not possible to recover
+//     // easilly from an exceptional set of circumstances at this point in the
+//     // program. It should however, ideally be replaced with one or more
+//     // catch clauses optimised to handle more specific problems.
+//     catch(Exception ex) {
+//         System.out.println("Caught an: " + ex.getClass().getName());
+//         System.out.println("Message: " + ex.getMessage());
+//         System.out.println("Stacktrace follows:.....");
+//         ex.printStackTrace(System.out);
+//         converted = false;
+//     }
+//     
+//     if (converted) {
+//         System.out.println("Conversion took " + 
+//               (int)((System.currentTimeMillis() - startTime)/1000) + " seconds");
+//     }
  }
 
  /**
