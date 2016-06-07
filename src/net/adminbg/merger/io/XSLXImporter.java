@@ -147,8 +147,8 @@ public class XSLXImporter extends Importer implements Exporter {
 		logger.info(file.toString());
 		try (final InputStream is = Files.newInputStream(file);
 				final BufferedWriter br = Files.newBufferedWriter(Paths.get(tempCsv), StandardOpenOption.CREATE);
-				) {
-			final XSSFWorkbook workbook = new XSSFWorkbook(is);
+				final XSSFWorkbook workbook = new XSSFWorkbook(is);) {
+
 			final XSSFSheet sheet = workbook.getSheetAt(0);
 			convert(sheet, br, 1, sheet.getLastRowNum());
 
@@ -210,21 +210,21 @@ public class XSLXImporter extends Importer implements Exporter {
 	private void copyHeader(final Path source) throws ImportException, InvalidFormatException {
 		final Path dest = getDestination();
 		logger.info("Copying header from " + source + " to " + dest);
-		try (final InputStream isSource = Files.newInputStream(source);
-				final InputStream isDest = Files.newInputStream(dest);
+		try (final XSSFWorkbook sourceWorkbook = new XSSFWorkbook(source.toFile());
+				final XSSFWorkbook destinationWorkbook = new XSSFWorkbook();
 				final OutputStream br = Files.newOutputStream(dest, StandardOpenOption.CREATE);
 
 		) {
 
-			final XSSFWorkbook destinationWorkbook =  new XSSFWorkbook(isDest);
-			final XSSFWorkbook sourceWorkbook = new XSSFWorkbook(isSource);
 			final XSSFSheet sourceSheet = sourceWorkbook.getSheetAt(0);
-			//final XSSFSheet destSheet = destinationWorkbook.getSheetAt(0);
-			//copyRows(sourceWorkbook, sourceSheet, destSheet, 1, 1);
+			sourceSheet.getSheetName();
+			destinationWorkbook.createSheet(sourceSheet.getSheetName());
+			final XSSFSheet destSheet = destinationWorkbook.getSheetAt(0);
+			copyRows(sourceWorkbook, destinationWorkbook, sourceSheet, destSheet, 0, 1);
 
 			destinationWorkbook.write(br);
-//			sourceWorkbook.close();
-//			destinationWorkbook.close();
+			sourceWorkbook.close();
+			destinationWorkbook.close();
 
 		} catch (IOException e) {
 			final String msg = e.getMessage();
@@ -234,8 +234,8 @@ public class XSLXImporter extends Importer implements Exporter {
 
 	}
 
-	private void copyRows(XSSFWorkbook workbook, XSSFSheet worksheet, XSSFSheet destSheet, int sourceRowNum,
-			int rowCount) {
+	private void copyRows(XSSFWorkbook workbook, XSSFWorkbook workbook2, XSSFSheet worksheet, XSSFSheet destSheet,
+			int sourceRowNum, int rowCount) {
 		for (int i = sourceRowNum; i < rowCount; i++) {
 			XSSFRow sourceRow = worksheet.getRow(i);
 			XSSFRow newRow = destSheet.createRow(i);
@@ -254,7 +254,7 @@ public class XSLXImporter extends Importer implements Exporter {
 				}
 
 				// Copy style from old cell and apply to new cell
-				XSSFCellStyle newCellStyle = workbook.createCellStyle();
+				XSSFCellStyle newCellStyle = workbook2.createCellStyle();
 				newCellStyle.cloneStyleFrom(oldCell.getCellStyle());
 				newCell.setCellStyle(newCellStyle);
 				// If there is a cell comment, copy

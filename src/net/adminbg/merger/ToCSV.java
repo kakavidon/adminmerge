@@ -140,22 +140,7 @@ public class ToCSV {
 
 			e.printStackTrace();
 		}
-		try {
-			final Connection connection = instance.getConnection();
 
-			final ResultSet tables = connection.getMetaData().getTables(null, null, "CATALOGS",
-					new String[] { "SYSTEM TABLE" });
-
-			while (tables.next()) {
-				final String string = tables.getString(1);
-				System.out.println(string + ":" + tables.getString(2) + ":" + tables.getString(3) + ":"
-						+ tables.getString(4) + ":" + tables.getString(5));
-			}
-			instance.dispose();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 
 	}
 }
