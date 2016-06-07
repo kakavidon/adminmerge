@@ -5,7 +5,9 @@ import java.nio.file.LinkOption;
 import java.nio.file.Path;
 
 public enum FileTest {
-	FILE_EXISTS {
+	
+	EXISTS {
+	
 		@Override
 		public boolean check(final Path target) {
 			final boolean exists = Files.exists(target, LinkOption.NOFOLLOW_LINKS);
@@ -16,7 +18,7 @@ public enum FileTest {
 			return exists;
 		}
 	},
-	FILE_READABLE {
+	READABLE {
 		@Override
 		public boolean check(Path target) {
 			final boolean isReadable = Files.isReadable(target);
@@ -27,7 +29,7 @@ public enum FileTest {
 			return isReadable;
 		}
 	},
-	FILE_WRITABLE {
+	WRITABLE {
 		@Override
 		public boolean check(Path target) {
 			final boolean isWritable = Files.isReadable(target);

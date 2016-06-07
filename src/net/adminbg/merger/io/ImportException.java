@@ -1,5 +1,7 @@
 package net.adminbg.merger.io;
 
+
+
 public class ImportException extends Exception {
 
 	/**
@@ -9,5 +11,9 @@ public class ImportException extends Exception {
 
 	public ImportException (final String msg ){
 		super(msg);
+	}
+
+	public ImportException(String msg, Throwable e) {
+		super(msg, e);
 	}
 }

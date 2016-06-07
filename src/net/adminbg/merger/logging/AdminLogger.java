@@ -10,30 +10,32 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
+import net.adminbg.merger.EmptySupplier;
+
 public enum AdminLogger {
 	INSTANCE;
-
 
 	private static FileHandler fileTxt;
 
 	private static SimpleFormatter formatterTxt;
+	public static final EmptySupplier<String> EMPTY_SUPPLIER = new EmptySupplier<String>();
 
-	public Logger getLogger(final String className)  {
-		
-		Logger logger = Logger.getLogger(className); 
-		
+	public Logger getLogger(final String className) {
+
+		Logger logger = Logger.getLogger(className);
+
 		Boolean isDevelopment = Boolean.valueOf(IS_DEVELOPMENT);
 		if (!isDevelopment) {
 			Logger rootLogger = Logger.getLogger("");
 			Handler[] handlers = rootLogger.getHandlers();
 
 			if (handlers[0] instanceof ConsoleHandler) {
-
-				rootLogger.removeHandler(handlers[0]);
-
+				if (handlers != null && handlers.length > 0) {
+					rootLogger.removeHandler(handlers[0]);
+				}
 			}
 		}
-		
+
 		logger.setLevel(Level.INFO);
 		try {
 			fileTxt = new FileHandler("./logs/adminmere.log");
@@ -49,7 +51,5 @@ public enum AdminLogger {
 		return logger;
 
 	}
-
-
 
 }

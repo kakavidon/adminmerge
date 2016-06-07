@@ -30,6 +30,10 @@ public enum Configuration {
 	public final static String STORE_TABLE_NAME;
 	public final static String STORE_TABLE_COLUMNS;
 	public final static String STORE_TABLE_COLUMN_TYPES;
+	public final static String SHOP_TABLE_NAME;
+	public final static String SHOP_TABLE_COLUMNS;
+	public final static String SHOP_TABLE_COLUMN_TYPES;	
+	public final static String DB_SCEMA;
 	private static Logger logger;	
 	
 	static {
@@ -55,6 +59,11 @@ public enum Configuration {
 		STORE_TABLE_NAME  = Messages.getString("store.table.name");
 		STORE_TABLE_COLUMNS  = Messages.getString("store.table.columns");
 		STORE_TABLE_COLUMN_TYPES  = Messages.getString("store.table.column.types");
+		SHOP_TABLE_NAME= Messages.getString("shop.table.name");
+		SHOP_TABLE_COLUMNS= Messages.getString("shop.table.columns");
+		SHOP_TABLE_COLUMN_TYPES= Messages.getString("shop.table.column.types");
+		DB_SCEMA = Messages.getString("db.schema");
+		
 	}
 
 
