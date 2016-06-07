@@ -66,9 +66,11 @@ public class XSLXImporter extends Importer implements Exporter {
 		final Path firstFile = getFirstFile(sourceDirectory);
 		try {
 			copyHeader(firstFile);
+			
 		} catch (InvalidFormatException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			final String msg = e.getMessage();
+			logger.log(Level.SEVERE, e, EMPTY_SUPPLIER);
+			throw new ImportException(msg, e);			
 		}
 		super.importFiles(sourceDirectory);
 	}
@@ -77,6 +79,9 @@ public class XSLXImporter extends Importer implements Exporter {
 	protected void importFile(Path source) throws ImportException {
 		logger.info(source.toString());
 		toCsv(source);
+		// TODO Load file into database
+		// TODO Join
+		// TODO append matching to destination
 
 	}
 
