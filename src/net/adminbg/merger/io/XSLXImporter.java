@@ -7,6 +7,8 @@ import static net.adminbg.merger.io.FileTest.validate;
 import static net.adminbg.merger.logging.AdminLogger.EMPTY_SUPPLIER;
 import static net.adminbg.merger.ui.Configuration.DB_SCEMA;
 import static net.adminbg.merger.ui.Configuration.DEFAULT_SOURCE_DIR;
+import static net.adminbg.merger.ui.Configuration.SHOP_TABLE_COLUMNS;
+import static net.adminbg.merger.ui.Configuration.SHOP_TABLE_COLUMN_TYPES;
 import static net.adminbg.merger.ui.Configuration.SHOP_TABLE_NAME;
 
 import java.io.BufferedWriter;
@@ -18,7 +20,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -41,6 +46,13 @@ public class XSLXImporter extends Importer implements Exporter {
 	private final String dropStatement = String.format(dropStr, dbSchema, tableName);
 	private Path destination = null;
 	private final String tempCsv = DEFAULT_SOURCE_DIR + "tmp.csv";
+	private final String createStatement = "CREATE TABLE IF NOT EXISTS %s.%s (%s);";
+	private final String insertStatement = "\nINSERT INTO %s ( SELECT * FROM CSVREAD('%s',%s,%s));";
+	private final String charset = "'charset=UTF-8 fieldSeparator=,'";
+	private final String JOIN = "SELECT\n" + "            P.PRODUCT_ID,\n" + "             P.SKU,\n"
+			+ "           S.QUANTITY,\n" + "             P.ROW_ID   \n" + "        FROM PUBLIC.PRODUCTS AS P\n"
+			+ "  INNER JOIN PUBLIC.STORE AS S\n" + "          ON P.SKU = S.CODE\n" + "       WHERE\n"
+			+ "             P.SKU IS NOT NULL\n" + "         AND\n" + "             P.QUANTITY <> S.QUANTITY";
 
 	@Override
 	public String getExtension() {
@@ -66,22 +78,169 @@ public class XSLXImporter extends Importer implements Exporter {
 		final Path firstFile = getFirstFile(sourceDirectory);
 		try {
 			copyHeader(firstFile);
-			
+
 		} catch (InvalidFormatException e) {
 			final String msg = e.getMessage();
 			logger.log(Level.SEVERE, e, EMPTY_SUPPLIER);
-			throw new ImportException(msg, e);			
+			throw new ImportException(msg, e);
 		}
 		super.importFiles(sourceDirectory);
 	}
 
 	@Override
-	protected void importFile(Path source) throws ImportException {
-		logger.info(source.toString());
-		toCsv(source);
-		// TODO Load file into database
-		// TODO Join
-		// TODO append matching to destination
+	protected void importFile(final Path source) throws ImportException {
+		try {
+			final XSSFWorkbook sourceWorkbook = new XSSFWorkbook(source.toFile());
+			final XSSFWorkbook destinationWorkbook = new XSSFWorkbook(getDestination().toFile());
+			logger.info(source.toString());
+			toCsv(source);
+			load(tempCsv);
+
+			// TODO Join
+			// TODO append matching to destination
+			append(source, sourceWorkbook, destinationWorkbook);
+			getDBManager().truncate(dbSchema, tableName);
+			sourceWorkbook.close();
+			destinationWorkbook.close();
+		} catch (SQLException e) {
+			final String msg = e.getMessage();
+			logger.log(Level.SEVERE, e, EMPTY_SUPPLIER);
+			throw new ImportException(msg, e);
+		} catch (IOException e) {
+			final String msg = e.getMessage();
+			logger.log(Level.SEVERE, e, EMPTY_SUPPLIER);
+			throw new ImportException(msg, e);
+		} catch (InvalidFormatException e) {
+
+			final String msg = e.getMessage();
+			logger.log(Level.SEVERE, e, EMPTY_SUPPLIER);
+			throw new ImportException(msg, e);
+		}
+
+	}
+
+	private void append(final Path source, XSSFWorkbook sourceWorkbook, XSSFWorkbook destinationWorkbook)
+			throws SQLException, ImportException {
+		logger.info("Appending to result to Excel ...");
+		try (final OutputStream br = Files.newOutputStream(getDestination(), StandardOpenOption.APPEND);) {
+			final Connection connection = getDBManager().getConnection();
+			final Statement statement = connection.createStatement();
+
+			final XSSFSheet sourceSheet = sourceWorkbook.getSheetAt(0);
+
+			final XSSFSheet destinationSheet = destinationWorkbook.getSheetAt(0);
+			final ResultSet rs = statement.executeQuery(JOIN);
+			final int lastRowNum = destinationSheet.getLastRowNum();
+			int position = lastRowNum + 1;
+			while (rs.next()) {
+				final long productId = rs.getLong(1);
+				final String quantity = rs.getString(3);
+				final long rowIndex = rs.getLong(4);
+				System.out.println(
+						String.format("Copy row #%d with id=%d and quantity=%s", rowIndex, productId, quantity));
+				final XSSFRow sourceRow = sourceSheet.getRow((int) rowIndex);
+				
+				XSSFRow destinationRow = destinationSheet.createRow(position);
+				
+				// Loop through source columns to add to new row
+				for (int cellIndx = 0; cellIndx < sourceRow.getLastCellNum(); cellIndx++) {
+					// Grab a copy of the old/new cell
+					XSSFCell oldCell = sourceRow.getCell(cellIndx);
+					XSSFCell newCell = destinationRow.createCell(cellIndx);
+                         
+					// If the old cell is null jump to next cell
+					if (oldCell == null) {
+						newCell = null;
+						continue;
+
+					}
+                    
+					// Copy style from old cell and apply to new cell
+					XSSFCellStyle newCellStyle = destinationWorkbook.createCellStyle();
+					newCellStyle.cloneStyleFrom(oldCell.getCellStyle());
+					newCell.setCellStyle(newCellStyle);
+					// If there is a cell comment, copy
+					if (oldCell.getCellComment() != null) {
+						newCell.setCellComment(oldCell.getCellComment());
+					}
+					// If there is a cell hyperlink, copy
+					if (oldCell.getHyperlink() != null) {
+						newCell.setHyperlink(oldCell.getHyperlink());
+					}
+					// Set the cell data type
+					newCell.setCellType(oldCell.getCellType());
+					if (cellIndx == 17 ){
+						newCell.setCellValue(quantity);
+						continue;
+					}
+					// Set the cell data value
+					switch (oldCell.getCellType()) {
+					case Cell.CELL_TYPE_BLANK:
+						newCell.setCellValue(oldCell.getStringCellValue());
+						break;
+					case Cell.CELL_TYPE_BOOLEAN:
+						newCell.setCellValue(oldCell.getBooleanCellValue());
+						break;
+					case Cell.CELL_TYPE_ERROR:
+						newCell.setCellErrorValue(oldCell.getErrorCellValue());
+						break;
+					case Cell.CELL_TYPE_FORMULA:
+						newCell.setCellFormula(oldCell.getCellFormula());
+						break;
+					case Cell.CELL_TYPE_NUMERIC:
+						newCell.setCellValue(oldCell.getNumericCellValue());
+						break;
+					case Cell.CELL_TYPE_STRING:
+						newCell.setCellValue(oldCell.getRichStringCellValue());
+						break;
+					}
+				}
+				position++;
+			}
+			
+			destinationWorkbook.write(br);
+			
+		} catch (IOException e) {
+			final String msg = e.getMessage();
+			logger.log(Level.SEVERE, e, EMPTY_SUPPLIER);
+			throw new ImportException(msg, e);
+		}
+	}
+
+	private void load(final String file) throws ImportException {
+		final String columnNames[] = SHOP_TABLE_COLUMNS.split(",");
+		final String columnTypes[] = SHOP_TABLE_COLUMN_TYPES.split(";");
+		if (columnNames == null || columnTypes == null || columnNames.length != columnTypes.length) {
+			throw new ImportException("Collumn's names should equals collumn types.");
+		}
+
+		StringBuffer sb = new StringBuffer();
+		int idx = 0;
+		for (String column : columnNames) {
+			sb.append(column).append(" ").append(columnTypes[idx]).append(",");
+			idx++;
+		}
+
+		logger.info("Loading ... " + file);
+
+		final String columns = sb.toString().replaceAll(",$", "");
+
+		final String create = String.format(createStatement, dbSchema, tableName, columns.replaceAll("\"", ""));
+		final String insert = String.format(insertStatement, tableName, file, "null", charset);
+		logger.info(create);
+		logger.info(insert);
+
+		try {
+
+			logger.info(create);
+			executeStatement(create);
+			logger.info(insert);
+			executeStatement(insert);
+		} catch (SQLException e) {
+			final String msg = e.getMessage();
+			logger.log(Level.SEVERE, e, EMPTY_SUPPLIER);
+			throw new ImportException(msg, e);
+		}
 
 	}
 
@@ -185,7 +344,9 @@ public class XSLXImporter extends Importer implements Exporter {
 
 				switch (cell.getCellType()) {
 				case Cell.CELL_TYPE_BLANK:
-					data.append(cell.getStringCellValue()).append(",");
+					final String stringCellValue = cell.getStringCellValue();
+					stringCellValue.trim();
+					data.append(stringCellValue).append(",");
 					break;
 				case Cell.CELL_TYPE_BOOLEAN:
 					data.append(cell.getBooleanCellValue()).append(",");
@@ -200,13 +361,15 @@ public class XSLXImporter extends Importer implements Exporter {
 					data.append(cell.getNumericCellValue()).append(",");
 					break;
 				case Cell.CELL_TYPE_STRING:
-					data.append(cell.getRichStringCellValue()).append(",");
+					final String str = cell.getStringCellValue();
+					str.trim();
+					data.append(str).append(",");
 					break;
 				}
 
 			}
 
-			data.append("\n");
+			data.append(row.getRowNum()).append(",").append("\n");
 		}
 
 		br.write(data.toString());

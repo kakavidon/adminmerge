@@ -45,10 +45,10 @@ public class CSVImporter extends Importer {
 
 		final String file = source.toAbsolutePath().toString();
 
-		System.out.println("Loading ... " + file);
+		//System.out.println("Loading ... " + file);
 
 		final String columns = sb.toString().replaceAll(",$", "");
-		final String create = String.format(createStatement, tableName, columns);
+		final String create = String.format(createStatement, tableName, columns.replaceAll("\"", ""));
 		final String insert = String.format(insertStatement, tableName, file, commaSeparated, charset);
 
 		try {

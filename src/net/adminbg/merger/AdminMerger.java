@@ -23,12 +23,20 @@ public class AdminMerger {
 		try {
 			logger.info("Starting DBManager ... ");
 			DBManager.INSTANCE.connect();
+			DBManager1.getInstance().start();
 			logger.info("Starting main window");
 			MainWindow.start();
 		} catch (ClassNotFoundException e) {
 			logger.log(Level.SEVERE, "Unable to create DBManager.", e);
 		} catch (SQLException e) {
 			logger.log(Level.SEVERE, "SQL error .", e);
+		} finally {
+			try {
+				DBManager1.getInstance().dispose();
+			} catch (SQLException e) {
+	
+				logger.log(Level.SEVERE, "SQL error .", e);
+			}
 		}
 
 	}

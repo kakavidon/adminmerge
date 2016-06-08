@@ -29,9 +29,11 @@ public class DBManager1 {
 	}
 
 	public void start() {
+
 		pool = JdbcConnectionPool.create(Configuration.DB_JDBC_URL, "", "");
 		final Integer maxConnections = Integer.valueOf(Configuration.DB_JDBC_MAX_CONNECTIONS);
 		pool.setMaxConnections(maxConnections);
+
 	}
 
 	public void dispose() throws SQLException {
@@ -45,33 +47,50 @@ public class DBManager1 {
 	}
 
 	public Connection getConnection() throws SQLException {
+
 		return pool.getConnection();
 	}
 
 	public ResultSet runQuery(final String sql) throws SQLException {
+
 		Statement stmt = null;
-		stmt = getConnection().createStatement();
+		final Connection connection = getConnection();
+		stmt = connection.createStatement();
 		ResultSet resultSet = stmt.executeQuery(sql);
 		resultSets.add(resultSet);
+		connection.close();
 		return resultSet;
 	}
-	
+
+	public void truncate(final String schema, final String table) throws SQLException {
+		Statement stmt = null;
+		final Connection connection = getConnection();
+		stmt = connection.createStatement();
+		stmt.execute("TRUNCATE TABLE " + schema + "." + table + ";");
+		connection.close();
+
+	}
+
 	public long countRows(final String schema, final String table) throws SQLException {
 		Statement stmt = null;
-		stmt = getConnection().createStatement();
-		ResultSet resultSet = stmt.executeQuery("SELECT COUNT(*) FROM "+schema+"."+table+";");
+		final Connection connection = getConnection();
+		stmt = connection.createStatement();
+		ResultSet resultSet = stmt.executeQuery("SELECT COUNT(*) FROM " + schema + "." + table + ";");
 		Long rowCount = -1L;
-		if (resultSet != null ){
+		if (resultSet != null) {
 			rowCount = resultSet.getLong(1);
 		}
 		resultSet.close();
+		connection.close();
 		return rowCount;
-	}	
-	
+	}
+
 	public void executeStatement(final String sql) throws SQLException {
 		Statement stmt = null;
-		stmt = getConnection().createStatement();
+		final Connection connection = getConnection();
+		stmt = connection.createStatement();
 		stmt.execute(sql);
-	}	
+		connection.close();
+	}
 
 }

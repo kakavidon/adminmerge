@@ -17,8 +17,6 @@ limitations under the License.
 ==================================================================== */
 
 import java.nio.file.Paths;
-import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import net.adminbg.merger.io.CSVImporter;
@@ -125,8 +123,17 @@ import net.adminbg.merger.io.XSLXImporter;
 public class ToCSV {
 
 	public static void main(String[] args) {
+		for (int i = 0; i < 1; i++) {
+			test();
+		}
+
+	}
+
+	private static void test() {
+		final long nanoTime = System.currentTimeMillis();
 		final DBManager1 instance = DBManager1.getInstance();
 		instance.start();
+
 		Importer i = new CSVImporter();
 		XSLXImporter ex = new XSLXImporter();
 		try {
@@ -140,7 +147,13 @@ public class ToCSV {
 
 			e.printStackTrace();
 		}
-
-
+		try {
+			instance.dispose();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		final long after = System.currentTimeMillis();
+		System.out.println(after - nanoTime);
 	}
 }
