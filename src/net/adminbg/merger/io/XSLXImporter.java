@@ -325,7 +325,7 @@ public class XSLXImporter extends Importer implements Exporter {
 	}
 
 	public void convert(final XSSFSheet worksheet, BufferedWriter br, int rowIndex, int rowsCount) throws IOException {
-		logger.info("cloneHeader");
+		logger.info(worksheet.getSheetName());
 		final StringBuffer data = new StringBuffer();
 		final int[] cellIndecies = { 0, 3, 17 };
 		for (int i = rowIndex; i < rowsCount; i++) {

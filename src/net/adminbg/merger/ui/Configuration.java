@@ -4,11 +4,10 @@ import java.util.logging.Logger;
 
 import net.adminbg.merger.logging.AdminLogger;
 
-
 public enum Configuration {
-	
+
 	INSTANCE;
-	
+
 	public final static String BTN_EXIT;
 	public final static String BTN_MERGE;
 	public final static String BTN_OPEN;
@@ -21,7 +20,7 @@ public enum Configuration {
 	public final static String TEXTAREA_LOG_MESSAGE_STORE;
 	public final static String UI_STYLE;
 	public final static String IS_DEVELOPMENT;
-	public final static String SHOP_FILE_READER; 
+	public final static String SHOP_FILE_READER;
 	public final static String STORE_FILE_READER;
 	public final static String DEFAULT_SOURCE_DIR;
 	public final static String DB_JDBC_URL;
@@ -32,12 +31,15 @@ public enum Configuration {
 	public final static String STORE_TABLE_COLUMN_TYPES;
 	public final static String SHOP_TABLE_NAME;
 	public final static String SHOP_TABLE_COLUMNS;
-	public final static String SHOP_TABLE_COLUMN_TYPES;	
+	public final static String SHOP_TABLE_COLUMN_TYPES;
 	public final static String DB_SCEMA;
-	private static Logger logger;	
-	
+	public final static String COLUMN_DELIMITER;
+	public final static String ROW_DELIMITER;
+	public final static String CELL_INDECIES;
+	private static Logger logger;
+
 	static {
-	
+
 		BTN_EXIT = Messages.getString("MainWindow.btn.exit");
 		BTN_MERGE = Messages.getString("MainWindow.btn.merge");
 		BTN_OPEN = Messages.getString("MainWindow.btn.open");
@@ -51,25 +53,26 @@ public enum Configuration {
 		UI_STYLE = Messages.getString("MainWindow.ui.style");
 		IS_DEVELOPMENT = Messages.getString("AdminLogger.is.development");
 		SHOP_FILE_READER = Messages.getString("shop.file.loader");
-		STORE_FILE_READER  = Messages.getString("store.file.loader");
+		STORE_FILE_READER = Messages.getString("store.file.loader");
 		DEFAULT_SOURCE_DIR = Messages.getString("default.source.dir");
 		DB_JDBC_URL = Messages.getString("db.jdbc.url");
-		DB_JDBC_DRIVER  = Messages.getString("db.jdbc.driver");
-		DB_JDBC_MAX_CONNECTIONS  = Messages.getString("db.jdbc.max.connections");
-		STORE_TABLE_NAME  = Messages.getString("store.table.name");
-		STORE_TABLE_COLUMNS  = Messages.getString("store.table.columns");
-		STORE_TABLE_COLUMN_TYPES  = Messages.getString("store.table.column.types");
-		SHOP_TABLE_NAME= Messages.getString("shop.table.name");
-		SHOP_TABLE_COLUMNS= Messages.getString("shop.table.columns");
-		SHOP_TABLE_COLUMN_TYPES= Messages.getString("shop.table.column.types");
+		DB_JDBC_DRIVER = Messages.getString("db.jdbc.driver");
+		DB_JDBC_MAX_CONNECTIONS = Messages.getString("db.jdbc.max.connections");
+		STORE_TABLE_NAME = Messages.getString("store.table.name");
+		STORE_TABLE_COLUMNS = Messages.getString("store.table.columns");
+		STORE_TABLE_COLUMN_TYPES = Messages.getString("store.table.column.types");
+		SHOP_TABLE_NAME = Messages.getString("shop.table.name");
+		SHOP_TABLE_COLUMNS = Messages.getString("shop.table.columns");
+		SHOP_TABLE_COLUMN_TYPES = Messages.getString("shop.table.column.types");
 		DB_SCEMA = Messages.getString("db.schema");
-		
+		COLUMN_DELIMITER = Messages.getString("shop.csv.column.delimiter") ;
+		ROW_DELIMITER = Messages.getString("shop.csv.row.delimite") ;
+	    CELL_INDECIES = Messages.getString("shop.csv.cell.indicies") ;
+
 	}
 
-
-
 	public static Configuration getInstance() {
-		logger = AdminLogger.INSTANCE.getLogger(Configuration.class.getName());	
+		logger = AdminLogger.INSTANCE.getLogger(Configuration.class.getName());
 		logger.info(BTN_EXIT);
 		logger.info(BTN_MERGE);
 		logger.info(BTN_OPEN);
