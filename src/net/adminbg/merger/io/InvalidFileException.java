@@ -1,7 +1,5 @@
 package net.adminbg.merger.io;
 
-import java.io.IOException;
-
 public class InvalidFileException extends Exception {
 	/**
 	 * 

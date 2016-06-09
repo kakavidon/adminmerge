@@ -21,7 +21,8 @@ import java.sql.SQLException;
 
 import net.adminbg.merger.io.CSVImporter;
 import net.adminbg.merger.io.ImportException;
-import net.adminbg.merger.io.Importer;
+import net.adminbg.merger.io.Loader;
+import net.adminbg.merger.io.LoaderCopy;
 import net.adminbg.merger.io.InvalidFileException;
 import net.adminbg.merger.io.XSLXImporter;
 
@@ -130,11 +131,13 @@ public class ToCSV {
 	}
 
 	private static void test() {
+		
+		
 		final long nanoTime = System.currentTimeMillis();
-		final DBManager1 instance = DBManager1.getInstance();
+		final DBManager instance = DBManager.getInstance();
 		instance.start();
 
-		Importer i = new CSVImporter();
+		LoaderCopy i = new CSVImporter();
 		XSLXImporter ex = new XSLXImporter();
 		try {
 			i.importFiles(Paths.get("C:\\Users\\Lachezar.Nedelchev\\git\\adminmerge\\store"));

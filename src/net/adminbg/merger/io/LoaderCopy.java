@@ -15,16 +15,16 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import net.adminbg.merger.DBManager1;
+import net.adminbg.merger.DBManager;
 import net.adminbg.merger.logging.AdminLogger;
 
 import static net.adminbg.merger.logging.AdminLogger.EMPTY_SUPPLIER;
 
-public abstract class Importer {
+public abstract class LoaderCopy {
 
-	private static Logger logger = AdminLogger.INSTANCE.getLogger(Importer.class.getName());
+	private static Logger logger = AdminLogger.INSTANCE.getLogger(Loader.class.getName());
 
-	private DBManager1 dbManager = DBManager1.getInstance();
+	private DBManager dbManager = DBManager.getInstance();
 	protected String extension;
 	protected String dropStr = "DROP TABLE IF EXISTS %s.%s;";
 
@@ -68,7 +68,7 @@ public abstract class Importer {
 		final ResultSet rs = dbManager.runQuery(statement);
 		return rs;
 	}
-	public DBManager1 getDBManager() {
+	public DBManager getDBManager() {
 		return dbManager;
 	}
 

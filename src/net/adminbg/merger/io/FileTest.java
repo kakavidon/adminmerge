@@ -1,13 +1,14 @@
 package net.adminbg.merger.io;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 
 public enum FileTest {
-	
+
 	EXISTS {
-	
+
 		@Override
 		public boolean check(final Path target) {
 			final boolean exists = Files.exists(target, LinkOption.NOFOLLOW_LINKS);
@@ -61,11 +62,27 @@ public enum FileTest {
 			}
 			return isDirectory;
 		}
+	},
+	NON_EMPTY {
+		@Override
+		public boolean check(Path target) throws InvalidFileException {
+			boolean nonEmpty = false;
+			try {
+				nonEmpty = Files.size(target) > 0;
+			} catch (IOException e) {
+				throw new InvalidFileException(e.getMessage(), e);
+			}
+			if (!nonEmpty) {
+				final String msg = "\"%s\"  is empoty";
+				message = String.format(msg, target.toString());
+			}
+			return nonEmpty;
+		}
 	};
 
 	private static String message;
 
-	public abstract boolean check(final Path target);
+	public abstract boolean check(final Path target) throws InvalidFileException;
 
 	public static void validate(Path target, FileTest... tests) throws InvalidFileException {
 		for (FileTest test : tests) {

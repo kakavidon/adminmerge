@@ -1,69 +1,100 @@
 package net.adminbg.merger;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Set;
-import java.util.TreeSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.HashSet;
 
-public enum DBManager {
-	INSTANCE;
-	private static final Logger logger = Logger.getLogger(DBManager.class
-			.getName());
-	private Connection connection;
-	private Set<ResultSet> resultSets = new TreeSet<ResultSet>();
+import org.h2.jdbcx.JdbcConnectionPool;
 
-	public void connect() throws SQLException, ClassNotFoundException {
-		logger.info("");
-		final String url = "jdbc:h2:.\\data\\admin.dat;FILE_LOCK=FS;PAGE_SIZE=1024;CACHE_SIZE=8192";
-		Class.forName("org.h2.Driver");
-		this.setConnection(DriverManager.getConnection(url));
-		System.out.println("Connected database successfully...");
+import net.adminbg.merger.ui.Configuration;
+
+public class DBManager implements AutoCloseable{
+
+	private JdbcConnectionPool pool = null;
+	private final Set<ResultSet> resultSets = new HashSet<ResultSet>();
+
+	private DBManager() {
+	}
+
+	public static DBManager getInstance() {
+		return DBManager1Holder.INSTANCE;
+	}
+
+	private static class DBManager1Holder {
+
+		private static final DBManager INSTANCE = new DBManager();
+	}
+
+	public void start() {
+		pool = JdbcConnectionPool.create(Configuration.DB_JDBC_URL, "", "");
+		final Integer maxConnections = Integer.valueOf(Configuration.DB_JDBC_MAX_CONNECTIONS);
+		pool.setMaxConnections(maxConnections);
 
 	}
 
-	public ResultSet runSQL(final String sql) throws SQLException {
-		Statement stmt = null;
-		stmt = getConnection().createStatement();
-		stmt.executeQuery(sql);
-		ResultSet resultSet = stmt.executeQuery(sql);
-		resultSets.add(resultSet);
-		return resultSet;
-	}
-
-	public void disconnect() throws SQLException {
-		logger.info("");
+	public void dispose() throws SQLException {
 		for (ResultSet rs : resultSets) {
 			if (!rs.isClosed()) {
 				rs.close();
+				rs = null;
 			}
 		}
-		if (!connection.isClosed()) {
-			connection.close();
-		}
+		pool.dispose();
 	}
 
-	public void executeSQL(final String sql) throws SQLException {
+	public Connection getConnection() throws SQLException {
+		return pool.getConnection();
+	}
+
+	public ResultSet runQuery(final String sql) throws SQLException {
+
 		Statement stmt = null;
-		stmt = getConnection().createStatement();
-		stmt.execute(sql);
-		boolean result = stmt.execute(sql);
-		if (result) {
-			logger.log(Level.INFO, "Success:  \"" + sql + "\".");
-		} else {
-			logger.log(Level.SEVERE, "Failed to execute \"" + sql + "\".");
+		final Connection connection = getConnection();
+		stmt = connection.createStatement();
+		ResultSet resultSet = stmt.executeQuery(sql);
+		resultSets.add(resultSet);
+		connection.close();
+		return resultSet;
+	}
+
+	public void truncate(final String schema, final String table) throws SQLException {
+		Statement stmt = null;
+		final Connection connection = getConnection();
+		stmt = connection.createStatement();
+		stmt.execute("TRUNCATE TABLE " + schema + "." + table + ";");
+		connection.close();
+
+	}
+
+	public long countRows(final String schema, final String table) throws SQLException {
+		Statement stmt = null;
+		final Connection connection = getConnection();
+		stmt = connection.createStatement();
+		ResultSet resultSet = stmt.executeQuery("SELECT COUNT(*) FROM " + schema + "." + table + ";");
+		Long rowCount = -1L;
+		if (resultSet != null) {
+			rowCount = resultSet.getLong(1);
 		}
+		resultSet.close();
+		connection.close();
+		return rowCount;
 	}
 
-	public Connection getConnection() {
-		return connection;
+	public void executeStatement(final String sql) throws SQLException {
+		Statement stmt = null;
+		final Connection connection = getConnection();
+		stmt = connection.createStatement();
+		stmt.execute(sql);
+		connection.close();
 	}
 
-	public void setConnection(Connection connection) {
-		this.connection = connection;
+	@Override
+	public void close() throws Exception {
+		dispose();
+		
 	}
+
 }

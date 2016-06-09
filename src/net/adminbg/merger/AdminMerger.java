@@ -5,7 +5,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import net.adminbg.merger.ui.MainWindow;
-
+import net.adminbg.merger.DBManager;
 /**
  * 
  * @author lachezar.nedelchev
@@ -22,21 +22,16 @@ public class AdminMerger {
 
 		try {
 			logger.info("Starting DBManager ... ");
-			DBManager.INSTANCE.connect();
-			DBManager1.getInstance().start();
+			DBManager.getInstance().start();
 			logger.info("Starting main window");
 			MainWindow.start();
-		} catch (ClassNotFoundException e) {
-			logger.log(Level.SEVERE, "Unable to create DBManager.", e);
-		} catch (SQLException e) {
-			logger.log(Level.SEVERE, "SQL error .", e);
 		} finally {
-			try {
-				DBManager1.getInstance().dispose();
-			} catch (SQLException e) {
-	
-				logger.log(Level.SEVERE, "SQL error .", e);
-			}
+//			try {
+//				DBManager.getInstance().dispose();
+//			} catch (SQLException e) {
+//	
+//				logger.log(Level.SEVERE, "SQL error .", e);
+//			}
 		}
 
 	}

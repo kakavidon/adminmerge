@@ -38,7 +38,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import net.adminbg.merger.logging.AdminLogger;
 
-public class XSLXImporter extends Importer implements Exporter {
+public class XSLXImporter extends LoaderCopy implements Exporter {
 
 	private static Logger logger = AdminLogger.INSTANCE.getLogger(XSLXImporter.class.getName());
 	protected final String extension = ".xlsx";
@@ -50,7 +50,7 @@ public class XSLXImporter extends Importer implements Exporter {
 	private final String createStatement = "CREATE TABLE IF NOT EXISTS %s.%s (%s);";
 	private final String insertStatement = "\nINSERT INTO %s ( SELECT * FROM CSVREAD('%s',%s,%s));";
 	private final String charset = "'charset=UTF-8 fieldSeparator=,'";
-	private final String JOIN = "SELECT\n" + "            P.PRODUCT_ID,\n" + "             P.SKU,\n"
+	public final static String JOIN = "SELECT\n" + "            P.PRODUCT_ID,\n" + "             P.SKU,\n"
 			+ "           S.QUANTITY,\n" + "             P.ROW_ID   \n" + "        FROM PUBLIC.PRODUCTS AS P\n"
 			+ "  INNER JOIN PUBLIC.STORE AS S\n" + "          ON P.SKU = S.CODE\n" + "       WHERE\n"
 			+ "             P.SKU IS NOT NULL\n" + "         AND\n" + "             P.QUANTITY <> S.QUANTITY";
@@ -99,7 +99,7 @@ public class XSLXImporter extends Importer implements Exporter {
 			load(tempCsv, source);
 			ZipSecureFile.setMinInflateRatio(0);
 			append(source, sourceWorkbook, destinationWorkbook);
-			getDBManager().truncate(dbSchema, tableName);
+//			getDBManager().truncate(dbSchema, tableName);
 			sourceWorkbook.close();
 			destinationWorkbook.close();
 			sourceWorkbook = null;
@@ -242,6 +242,8 @@ public class XSLXImporter extends Importer implements Exporter {
 			logger.log(Level.SEVERE, e, EMPTY_SUPPLIER);
 			throw new ImportException(msg, e);
 		}
+		
+
 
 	}
 
