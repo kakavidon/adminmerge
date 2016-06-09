@@ -28,6 +28,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.openxml4j.util.ZipSecureFile;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
@@ -90,18 +91,19 @@ public class XSLXImporter extends Importer implements Exporter {
 	@Override
 	protected void importFile(final Path source) throws ImportException {
 		try {
-			final XSSFWorkbook sourceWorkbook = new XSSFWorkbook(source.toFile());
-			final XSSFWorkbook destinationWorkbook = new XSSFWorkbook(getDestination().toFile());
+			XSSFWorkbook sourceWorkbook = new XSSFWorkbook(source.toFile());
+			XSSFWorkbook destinationWorkbook = new XSSFWorkbook(getDestination().toFile());
 			logger.info(source.toString());
 			toCsv(source);
-			load(tempCsv);
-
-			// TODO Join
-			// TODO append matching to destination
+			logger.info(source.toString());
+			load(tempCsv, source);
+			ZipSecureFile.setMinInflateRatio(0);
 			append(source, sourceWorkbook, destinationWorkbook);
 			getDBManager().truncate(dbSchema, tableName);
 			sourceWorkbook.close();
 			destinationWorkbook.close();
+			sourceWorkbook = null;
+			destinationWorkbook = null;
 		} catch (SQLException e) {
 			final String msg = e.getMessage();
 			logger.log(Level.SEVERE, e, EMPTY_SUPPLIER);
@@ -139,22 +141,22 @@ public class XSLXImporter extends Importer implements Exporter {
 				System.out.println(
 						String.format("Copy row #%d with id=%d and quantity=%s", rowIndex, productId, quantity));
 				final XSSFRow sourceRow = sourceSheet.getRow((int) rowIndex);
-				
+
 				XSSFRow destinationRow = destinationSheet.createRow(position);
-				
+
 				// Loop through source columns to add to new row
 				for (int cellIndx = 0; cellIndx < sourceRow.getLastCellNum(); cellIndx++) {
 					// Grab a copy of the old/new cell
 					XSSFCell oldCell = sourceRow.getCell(cellIndx);
 					XSSFCell newCell = destinationRow.createCell(cellIndx);
-                         
+
 					// If the old cell is null jump to next cell
 					if (oldCell == null) {
 						newCell = null;
 						continue;
 
 					}
-                    
+
 					// Copy style from old cell and apply to new cell
 					XSSFCellStyle newCellStyle = destinationWorkbook.createCellStyle();
 					newCellStyle.cloneStyleFrom(oldCell.getCellStyle());
@@ -169,7 +171,7 @@ public class XSLXImporter extends Importer implements Exporter {
 					}
 					// Set the cell data type
 					newCell.setCellType(oldCell.getCellType());
-					if (cellIndx == 17 ){
+					if (cellIndx == 17) {
 						newCell.setCellValue(quantity);
 						continue;
 					}
@@ -197,9 +199,9 @@ public class XSLXImporter extends Importer implements Exporter {
 				}
 				position++;
 			}
-			
+
 			destinationWorkbook.write(br);
-			
+
 		} catch (IOException e) {
 			final String msg = e.getMessage();
 			logger.log(Level.SEVERE, e, EMPTY_SUPPLIER);
@@ -207,7 +209,7 @@ public class XSLXImporter extends Importer implements Exporter {
 		}
 	}
 
-	private void load(final String file) throws ImportException {
+	private void load(final String file, Path source) throws ImportException {
 		final String columnNames[] = SHOP_TABLE_COLUMNS.split(",");
 		final String columnTypes[] = SHOP_TABLE_COLUMN_TYPES.split(";");
 		if (columnNames == null || columnTypes == null || columnNames.length != columnTypes.length) {
@@ -220,8 +222,6 @@ public class XSLXImporter extends Importer implements Exporter {
 			sb.append(column).append(" ").append(columnTypes[idx]).append(",");
 			idx++;
 		}
-
-		logger.info("Loading ... " + file);
 
 		final String columns = sb.toString().replaceAll(",$", "");
 
@@ -237,6 +237,7 @@ public class XSLXImporter extends Importer implements Exporter {
 			logger.info(insert);
 			executeStatement(insert);
 		} catch (SQLException e) {
+			logger.info(">>>> " + source);
 			final String msg = e.getMessage();
 			logger.log(Level.SEVERE, e, EMPTY_SUPPLIER);
 			throw new ImportException(msg, e);
@@ -310,8 +311,11 @@ public class XSLXImporter extends Importer implements Exporter {
 	private void toCsv(final Path file) throws ImportException {
 		logger.info(file.toString());
 		try (final InputStream is = Files.newInputStream(file);
-				final BufferedWriter br = Files.newBufferedWriter(Paths.get(tempCsv), StandardOpenOption.CREATE);
+				final BufferedWriter br = Files.newBufferedWriter(Paths.get(tempCsv), StandardOpenOption.WRITE,
+						StandardOpenOption.TRUNCATE_EXISTING);
 				final XSSFWorkbook workbook = new XSSFWorkbook(is);) {
+
+			// Files.deleteIfExists(Paths.get(tempCsv));
 
 			final XSSFSheet sheet = workbook.getSheetAt(0);
 			convert(sheet, br, 1, sheet.getLastRowNum());
@@ -329,6 +333,7 @@ public class XSLXImporter extends Importer implements Exporter {
 		final StringBuffer data = new StringBuffer();
 		final int[] cellIndecies = { 0, 3, 17 };
 		for (int i = rowIndex; i < rowsCount; i++) {
+
 			final XSSFRow row = worksheet.getRow(i);
 
 			if (row == null) {
@@ -344,9 +349,7 @@ public class XSLXImporter extends Importer implements Exporter {
 
 				switch (cell.getCellType()) {
 				case Cell.CELL_TYPE_BLANK:
-					final String stringCellValue = cell.getStringCellValue();
-					stringCellValue.trim();
-					data.append(stringCellValue).append(",");
+					data.append(",");
 					break;
 				case Cell.CELL_TYPE_BOOLEAN:
 					data.append(cell.getBooleanCellValue()).append(",");
@@ -358,12 +361,14 @@ public class XSLXImporter extends Importer implements Exporter {
 					data.append(cell.getCellFormula()).append(",");
 					break;
 				case Cell.CELL_TYPE_NUMERIC:
-					data.append(cell.getNumericCellValue()).append(",");
+					final double numericCellValue = cell.getNumericCellValue();
+					final Integer in = (int) numericCellValue;
+					data.append(in.toString().trim().replaceAll("\u00a0", "")).append(",");
 					break;
 				case Cell.CELL_TYPE_STRING:
 					final String str = cell.getStringCellValue();
 					str.trim();
-					data.append(str).append(",");
+					data.append(str.replaceAll("\u00a0", "")).append(",");
 					break;
 				}
 
@@ -372,7 +377,7 @@ public class XSLXImporter extends Importer implements Exporter {
 			data.append(row.getRowNum()).append(",").append("\n");
 		}
 
-		br.write(data.toString());
+		br.write(data.toString().replaceAll("\u00a0", ""));
 	}
 
 	private void copyHeader(final Path source) throws ImportException, InvalidFormatException {
