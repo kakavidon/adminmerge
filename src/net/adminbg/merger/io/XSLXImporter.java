@@ -395,7 +395,7 @@ public class XSLXImporter extends LoaderCopy implements Exporter {
 			sourceSheet.getSheetName();
 			destinationWorkbook.createSheet(sourceSheet.getSheetName());
 			final XSSFSheet destSheet = destinationWorkbook.getSheetAt(0);
-			copyRows(sourceWorkbook, destinationWorkbook, sourceSheet, destSheet, 0, 1);
+			copyRow(sourceWorkbook, destinationWorkbook, sourceSheet, destSheet, 0, 1);
 
 			destinationWorkbook.write(br);
 			sourceWorkbook.close();
@@ -409,7 +409,7 @@ public class XSLXImporter extends LoaderCopy implements Exporter {
 
 	}
 
-	private void copyRows(XSSFWorkbook workbook, XSSFWorkbook workbook2, XSSFSheet worksheet, XSSFSheet destSheet,
+	private void copyRow(XSSFWorkbook workbook, XSSFWorkbook workbook2, XSSFSheet worksheet, XSSFSheet destSheet,
 			int sourceRowNum, int rowCount) {
 		for (int i = sourceRowNum; i < rowCount; i++) {
 			XSSFRow sourceRow = worksheet.getRow(i);

@@ -66,7 +66,7 @@ public enum Configuration {
 		SHOP_TABLE_COLUMN_TYPES = Messages.getString("shop.table.column.types");
 		DB_SCEMA = Messages.getString("db.schema");
 		COLUMN_DELIMITER = Messages.getString("shop.csv.column.delimiter") ;
-		ROW_DELIMITER = Messages.getString("shop.csv.row.delimite") ;
+		ROW_DELIMITER = Messages.getString("shop.csv.row.delimiter") ;
 	    CELL_INDECIES = Messages.getString("shop.csv.cell.indicies") ;
 
 	}

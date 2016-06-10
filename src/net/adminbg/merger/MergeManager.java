@@ -19,12 +19,11 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import net.adminbg.merger.io.CSVLoader;
 import net.adminbg.merger.io.Converter;
 import net.adminbg.merger.io.ConverterFactory;
 import net.adminbg.merger.io.ImportException;
 import net.adminbg.merger.io.InvalidFileException;
-import net.adminbg.merger.io.XSLXConverter;
+import net.adminbg.merger.io.Loader;
 import net.adminbg.merger.logging.AdminLogger;
 
 /**
@@ -48,7 +47,7 @@ public enum MergeManager {
 	}
 
 	public void merge(final Map<String, String> loaderMapping, final File targetFile) throws ImportException {
-
+		final long start = System.nanoTime();
 		for (String dirName : loaderMapping.keySet()) {
 			Path targetDirectory = Paths.get(dirName);
 			logger.info("\"Directory Name\" = " + dirName);
@@ -61,18 +60,17 @@ public enum MergeManager {
 			}
 			final String className = loaderMapping.get(dirName);
 			final Converter converter = ConverterFactory.createConverter(className);
-			if ( converter instanceof XSLXConverter) {
-				continue;
-			}
 			converter.mergeFiles(targetDirectory);
 			final Path convertedTempFile = converter.getConvertedFile();
-			System.out.println(convertedTempFile.toFile().length());
-			CSVLoader c = new CSVLoader();
-			c.loadFile(converter.getConvertedFile());
-			logger.info("ready");
-			//csvConverter.mergeFiles(targetDirectory);
+			final Loader loader = converter.getLoader();
+			loader.loadFile(convertedTempFile);
+
 		}
 
+		final long end = System.nanoTime();
+		final String message = String.format("Export finished in %d", ((end - start) / 1000));
+		logger.info(message);
+		System.out.println(message);
 	}
 
 }

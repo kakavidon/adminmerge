@@ -4,8 +4,12 @@ import static net.adminbg.merger.io.FileTest.EXISTS;
 import static net.adminbg.merger.io.FileTest.IS_DIRECTORY;
 import static net.adminbg.merger.io.FileTest.READABLE;
 import static net.adminbg.merger.io.FileTest.*;
+import static net.adminbg.merger.ui.Configuration.DB_SCEMA;
 import static net.adminbg.merger.ui.Configuration.DEFAULT_SOURCE_DIR;
 import static net.adminbg.merger.ui.Configuration.NEW_LINE;
+import static net.adminbg.merger.ui.Configuration.STORE_TABLE_COLUMNS;
+import static net.adminbg.merger.ui.Configuration.STORE_TABLE_COLUMN_TYPES;
+import static net.adminbg.merger.ui.Configuration.STORE_TABLE_NAME;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -14,6 +18,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -22,6 +27,7 @@ import java.nio.file.Paths;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import net.adminbg.merger.io.Loader.LoaderBuilder;
 import net.adminbg.merger.logging.AdminLogger;
 
 public class CSVConverter implements Converter {
@@ -67,10 +73,12 @@ public class CSVConverter implements Converter {
 
 	public void mergeFile(final Path sourcePath, final Path targetPath, final int skipLines) throws ImportException {
 
+		final Charset charset = StandardCharsets.UTF_8;
+
 		try (final FileInputStream fis = new FileInputStream(sourcePath.toString());
-				final InputStreamReader r = new InputStreamReader(fis, StandardCharsets.UTF_8);
+				final InputStreamReader r = new InputStreamReader(fis, "Windows-1251");
 				final FileOutputStream fos = new FileOutputStream(targetPath.toString(), true);
-				final OutputStreamWriter w = new OutputStreamWriter(fos, StandardCharsets.UTF_8);
+				final OutputStreamWriter w = new OutputStreamWriter(fos, charset);
 				final BufferedWriter writer = new BufferedWriter(w);
 				final BufferedReader br = new BufferedReader(r);) {
 
@@ -98,6 +106,16 @@ public class CSVConverter implements Converter {
 	@Override
 	public Path getConvertedFile() {
 		return convertedFile;
+	}
+
+	@Override
+	public Loader getLoader() {
+		final LoaderBuilder loaderBuilder = new LoaderBuilder();
+		loaderBuilder.schema(DB_SCEMA);
+		loaderBuilder.table(STORE_TABLE_NAME);
+		loaderBuilder.tableColumns(STORE_TABLE_COLUMNS);
+		loaderBuilder.types(STORE_TABLE_COLUMN_TYPES);
+		return loaderBuilder.build();
 	}
 
 }
