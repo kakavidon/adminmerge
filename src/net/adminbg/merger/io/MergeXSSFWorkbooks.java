@@ -55,9 +55,9 @@ public class MergeXSSFWorkbooks {
 					// Read xlsx file
 					final long currentTimeMillis = System.currentTimeMillis();
 					System.out.println(file.toFile().toString());
-					 XSSFWorkbook newWorkbook = new XSSFWorkbook();
-					 XSSFWorkbook oldWorkbook = (XSSFWorkbook) WorkbookFactory.create(file.toFile());
-					final XSSFSheet oldSheet = oldWorkbook.getSheetAt(0);
+					XSSFWorkbook newWorkbook = new XSSFWorkbook();
+					XSSFWorkbook oldWorkbook = (XSSFWorkbook) WorkbookFactory.create(file.toFile());
+					final XSSFSheet oldSheet = oldWorkbook.getSheetAt(0); 
 
 					if (newSheet == null || newWorkbook.getNumberOfSheets() == 0) {
 						newSheet = newWorkbook.createSheet(oldSheet.getSheetName());
@@ -67,7 +67,7 @@ public class MergeXSSFWorkbooks {
 					newWorkbook.write(new FileOutputStream("new.xlsx"));
 					newWorkbook.close();
 					oldWorkbook.close();
-					
+
 					newWorkbook = null;
 					oldWorkbook = null;
 					System.gc();

@@ -131,9 +131,9 @@ public class ToCSV {
 	}
 
 	private static void test() {
+		System.out.println("Start");
 		
-		
-		final long nanoTime = System.currentTimeMillis();
+		final long startTime = System.currentTimeMillis();
 		final DBManager instance = DBManager.getInstance();
 		instance.start();
 
@@ -157,6 +157,6 @@ public class ToCSV {
 			e.printStackTrace();
 		}
 		final long after = System.currentTimeMillis();
-		System.out.println(after - nanoTime);
+		System.out.println("elapsed : " +(after - startTime));
 	}
 }

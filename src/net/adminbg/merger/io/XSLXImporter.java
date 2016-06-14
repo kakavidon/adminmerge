@@ -44,6 +44,7 @@ public class XSLXImporter extends LoaderCopy implements Exporter {
 	protected final String extension = ".xlsx";
 	private final String tableName = SHOP_TABLE_NAME;
 	private final String dbSchema = DB_SCEMA;
+	protected String truncateStatement = String.format("TRUNCATE TABLE %s.%s;", dbSchema, tableName);;
 	private final String dropStatement = String.format(dropStr, dbSchema, tableName);
 	private Path destination = null;
 	private final String tempCsv = DEFAULT_SOURCE_DIR + "tmp.csv";
@@ -54,6 +55,7 @@ public class XSLXImporter extends LoaderCopy implements Exporter {
 			+ "           S.QUANTITY,\n" + "             P.ROW_ID   \n" + "        FROM PUBLIC.PRODUCTS AS P\n"
 			+ "  INNER JOIN PUBLIC.STORE AS S\n" + "          ON P.SKU = S.CODE\n" + "       WHERE\n"
 			+ "             P.SKU IS NOT NULL\n" + "         AND\n" + "             P.QUANTITY <> S.QUANTITY";
+	XSSFWorkbook destinationWorkbook;
 
 	@Override
 	public String getExtension() {
@@ -77,10 +79,27 @@ public class XSLXImporter extends LoaderCopy implements Exporter {
 	public void importFiles(final Path sourceDirectory) throws InvalidFileException, ImportException {
 		logger.info(sourceDirectory.toString());
 		final Path firstFile = getFirstFile(sourceDirectory);
-		try {
-			copyHeader(firstFile);
 
-		} catch (InvalidFormatException e) {
+		try (final OutputStream br = Files.newOutputStream(getDestination(), StandardOpenOption.APPEND);) {
+			copyHeader(firstFile);
+			if (EXISTS.check(getDestination())) {
+
+				destinationWorkbook = new XSSFWorkbook();
+				final int numberOfSheets = destinationWorkbook.getNumberOfSheets();
+				if (numberOfSheets == 0 ) {
+					destinationWorkbook.createSheet();
+				} else if  (numberOfSheets > 0 ) {
+					for ( int i = 0 ; i < numberOfSheets ; i++){
+						destinationWorkbook.removeSheetAt(i);
+						
+					}
+					destinationWorkbook.createSheet();
+				}
+				logger.info(numberOfSheets+ " <<");
+				destinationWorkbook.write(br);
+				
+			}
+		} catch (InvalidFormatException | IOException e) {
 			final String msg = e.getMessage();
 			logger.log(Level.SEVERE, e, EMPTY_SUPPLIER);
 			throw new ImportException(msg, e);
@@ -92,14 +111,14 @@ public class XSLXImporter extends LoaderCopy implements Exporter {
 	protected void importFile(final Path source) throws ImportException {
 		try {
 			XSSFWorkbook sourceWorkbook = new XSSFWorkbook(source.toFile());
-			XSSFWorkbook destinationWorkbook = new XSSFWorkbook(getDestination().toFile());
+			destinationWorkbook = new XSSFWorkbook(getDestination().toFile());
 			logger.info(source.toString());
 			toCsv(source);
 			logger.info(source.toString());
 			load(tempCsv, source);
 			ZipSecureFile.setMinInflateRatio(0);
 			append(source, sourceWorkbook, destinationWorkbook);
-//			getDBManager().truncate(dbSchema, tableName);
+			// getDBManager().truncate(dbSchema, tableName);
 			sourceWorkbook.close();
 			destinationWorkbook.close();
 			sourceWorkbook = null;
@@ -132,6 +151,7 @@ public class XSLXImporter extends LoaderCopy implements Exporter {
 
 			final XSSFSheet destinationSheet = destinationWorkbook.getSheetAt(0);
 			final ResultSet rs = statement.executeQuery(JOIN);
+			logger.info(JOIN);
 			final int lastRowNum = destinationSheet.getLastRowNum();
 			int position = lastRowNum + 1;
 			while (rs.next()) {
@@ -199,7 +219,8 @@ public class XSLXImporter extends LoaderCopy implements Exporter {
 				}
 				position++;
 			}
-
+			final Statement truncate = connection.createStatement();
+			truncate.execute(truncateStatement);
 			destinationWorkbook.write(br);
 
 		} catch (IOException e) {
@@ -242,8 +263,6 @@ public class XSLXImporter extends LoaderCopy implements Exporter {
 			logger.log(Level.SEVERE, e, EMPTY_SUPPLIER);
 			throw new ImportException(msg, e);
 		}
-		
-
 
 	}
 
