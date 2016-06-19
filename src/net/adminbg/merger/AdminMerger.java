@@ -24,7 +24,7 @@ public class AdminMerger {
 			logger.info("Starting DBManager ... ");
 			DBManager.getInstance().start();
 			logger.info("Starting main window");
-			MainWindow.start();
+			new MainWindow().start();
 		} finally {
 //			try {
 //				DBManager.getInstance().dispose();
