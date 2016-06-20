@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.TreeMap;
+
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -18,54 +20,74 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
  *
  * @author kakavidon
  */
-public class ReadXlsxFileTask extends FileTask {
+public class ReadXlsxFileTask<U, V> extends FileTask {
 
-    private final int START_FROM = 1;
+	private final int START_FROM = 1;
 
-    private Map<String, XSSFRow> map = new TreeMap<>();
+	private Map<String, XSSFRow> map = new TreeMap<>();
 
-    public ReadXlsxFileTask(final Path file) {
-        super(file);
-    }
+	public ReadXlsxFileTask(final Path file) {
+		super(file);
+	}
 
-    @Override
-    public Map<String, XSSFRow> getMap() {
-        return this.map;
-    }
+	@Override
+	public Map<String, XSSFRow> getMap() {
+		return this.map;
+	}
 
-    @Override
-    public FileTask call() throws Exception {
-        final XSSFWorkbook xlsx;
-        try {
-            xlsx = new XSSFWorkbook(getFile().toFile());
-            final XSSFSheet sheet = xlsx.getSheetAt(0);
-            for (int rowIndex = START_FROM; rowIndex < sheet.getLastRowNum(); rowIndex++) {
-                final XSSFRow row = sheet.getRow(rowIndex);
-                if (row == null) {
-                    continue;
-                }
-                final XSSFCell cell = row.getCell(3);
-                if (cell == null) {
-                    continue;
-                }
+	@Override
+	public FileTask<String, XSSFRow> call() throws Exception {
+		int pop =0 ;
+		final XSSFWorkbook xlsx;
+		try {
 
-                map.put(readString(cell), row);
+			xlsx = new XSSFWorkbook(getFile().toFile());
+			final XSSFSheet sheet = xlsx.getSheetAt(0);
+			for (int rowIndex = START_FROM; rowIndex < sheet.getLastRowNum(); rowIndex++) {
+				final XSSFRow row = sheet.getRow(rowIndex);
+				pop = rowIndex;
+				if (row == null) {
+					continue;
+				}
+				final XSSFCell cell = row.getCell(3);
+				if (cell == null) {
+					continue;
+				}
 
-            }
-            
-        } catch (IOException e) {
-            //TODO handle
-        }
-        return this;
-    }
+				map.put(readString(cell), row);
 
-    private String readString(final XSSFCell cell) {
-        return cell.getStringCellValue();
-    }
-    
-    @Override
-    public int getWeight(){
-        return 4;
-    }
+			}
+
+		} catch (IOException | IllegalStateException e) {
+			System.out.println(getFile().toFile() +" at " + pop);
+			e.printStackTrace();
+
+		}
+		return this;
+	}
+
+	private String readString(final XSSFCell cell) {
+		String result = "";
+		switch (cell.getCellType()) {
+		case Cell.CELL_TYPE_NUMERIC:
+			final double numericCellValue = cell.getNumericCellValue();
+			result = String.valueOf(numericCellValue);
+			break;
+		case Cell.CELL_TYPE_BLANK:
+			result = "";
+			break;
+		case Cell.CELL_TYPE_STRING:
+			result = cell.getStringCellValue();
+			break;			
+		default:
+			break;
+		}
+		return result;
+	}
+
+	@Override
+	public int getWeight() {
+		return 4;
+	}
 
 }

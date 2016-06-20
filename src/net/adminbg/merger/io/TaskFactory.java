@@ -14,6 +14,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.poi.xssf.usermodel.XSSFRow;
+
 /**
  *
  * @author kakavidon
@@ -55,7 +57,7 @@ final public class TaskFactory<U, V> {
                     tasks.add(new ReadCsvFileTask(file));
                     break;
                 case ".xlsx":
-                    tasks.add(new ReadXlsxFileTask(file));
+                    tasks.add( new ReadXlsxFileTask<String,String>(file));
                     break;
                 default:
                     throw new UnsupportedOperationException("Unsupported extension : " + extension);
