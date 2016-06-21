@@ -120,7 +120,7 @@ final public class TaskFactory {
 		LOGGER.info("Last task percent " + lastTask.getPercentDone());
 	}
 
-	public void setHeaderTask() {
+	public void setHeaderTask(List<FileTask> tasks) {
 		LOGGER.info("Add header");
 		final Path excelFile = getExcelFile();
 		tasks.add(new ReadHeaderFileTask(excelFile));

@@ -361,7 +361,7 @@ public class MainWindow extends javax.swing.JPanel implements TaskListener {
 
 	private void merge(final Map<String, String> directories) throws IOException {
 		i =0 ;
-		outputArea.setText("");
+		outputArea.setEditable(true);
 		outputArea.repaint();
 		final long start = System.nanoTime();
 		System.out.println("Starting...");
@@ -415,6 +415,7 @@ public class MainWindow extends javax.swing.JPanel implements TaskListener {
 				progressBar.setValue(100);
 				outputArea.append("Done!\n");
 				outputArea.setEditable(true);
+				outputArea.setFocusable(true);
 			}
 
 		};
