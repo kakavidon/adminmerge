@@ -20,7 +20,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
  *
  * @author kakavidon
  */
-public class ReadXlsxFileTask<U, V> extends FileTask {
+public class ReadXlsxFileTask extends FileTask {
 
 	private final int START_FROM = 1;
 
@@ -36,7 +36,7 @@ public class ReadXlsxFileTask<U, V> extends FileTask {
 	}
 
 	@Override
-	public FileTask<String, XSSFRow> call() throws Exception {
+	public FileTask call() throws Exception {
 		int pop =0 ;
 		final XSSFWorkbook xlsx;
 		try {

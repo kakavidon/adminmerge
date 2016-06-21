@@ -17,7 +17,7 @@ import java.util.TreeMap;
  *
  * @author kakavidon
  */
-public class ReadCsvFileTask<U, V> extends FileTask {
+public class ReadCsvFileTask extends FileTask {
 
 	private Map<String, String> map = new TreeMap<>();
 	private final int START_FROM = 2;
@@ -27,7 +27,7 @@ public class ReadCsvFileTask<U, V> extends FileTask {
 	}
 
 	@Override
-	public FileTask<String, String> call() throws Exception {
+	public FileTask call() throws Exception {
 		final Charset forName = Charset.forName("Windows-1251");
 		final Path file = getFile();
 		final BufferedReader newBufferedReader = Files.newBufferedReader(file, forName);

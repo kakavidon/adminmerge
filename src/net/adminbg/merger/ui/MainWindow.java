@@ -13,12 +13,15 @@ import static net.adminbg.merger.ui.Configuration.UI_STYLE;
 
 import java.awt.Cursor;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.EventListener;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -33,14 +36,15 @@ import net.adminbg.merger.io.TaskDispatcher;
  *
  * @author kakavidon
  */
-public class MainWindow extends javax.swing.JPanel {
+public class MainWindow extends javax.swing.JPanel implements TaskListener {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 464314710332456958L;
 	private JFrame frame;
-	TaskDispatcher taskDispatcher;
+	// private TaskDispatcher taskDispatcher;
+	private TaskComponent taskComponent;
 	private static final Logger LOGGER = Logger.getLogger(MainWindow.class.getName());
 
 	/**
@@ -49,6 +53,8 @@ public class MainWindow extends javax.swing.JPanel {
 	public MainWindow() {
 		// taskDispatcher = new TaskDispatcher();
 		// taskDispatcher.addPropertyChangeListener(this);
+		taskComponent = new TaskComponent();
+		taskComponent.addTakListener(this);
 
 		initComponents();
 	}
@@ -204,11 +210,12 @@ public class MainWindow extends javax.swing.JPanel {
 
 	private void exitButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_exitButtonActionPerformed
 		frame.dispose();
+		System.exit(0);
 	}// GEN-LAST:event_exitButtonActionPerformed
 
 	private void storeButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_storeButtonActionPerformed
 		final JFileChooser fileChooser = new JFileChooser();
-		fileChooser.setCurrentDirectory(new File("."));
+		fileChooser.setCurrentDirectory(new File("C:\\Users\\Lachezar.Nedelchev\\git\\adminmerge\\store"));
 		fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		int returnVal = fileChooser.showOpenDialog(this);
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -226,8 +233,10 @@ public class MainWindow extends javax.swing.JPanel {
 	}// GEN-LAST:event_storeButtonActionPerformed
 
 	private void shopButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_shopButtonActionPerformed
+
 		final JFileChooser fileChooser = new JFileChooser();
-		fileChooser.setCurrentDirectory(new File("."));
+	//	fileChooser.setCurrentDirectory(new File(".\\shop"));
+		fileChooser.setSelectedFile(new File("C:\\Users\\Lachezar.Nedelchev\\git\\adminmerge\\shop"));
 		fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		int returnVal = fileChooser.showOpenDialog(this);
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -244,16 +253,47 @@ public class MainWindow extends javax.swing.JPanel {
 		}
 	}// GEN-LAST:event_shopButtonActionPerformed
 
+	// final EventQueue = new EventQueue() {
+	// protected void dispatchEvent(AWTEvent event) {
+	// System.out.println(event);
+	// super.dispatchEvent(event);
+	// }
+	// };
+	//
+	// class WorkerThread extends Thread {
+	// @Override
+	// public void run() {
+	// // Perform calculations
+	// for (int i = 1; i < 101; i++) {
+	//
+	//
+	// final ActionEvent actionEvent = new ActionEvent(this,
+	// AWTEvent.RESERVED_ID_MAX, "progress");
+	//
+	// queue.postEvent(actionEvent);
+	//// try {
+	//// TimeUnit.MICROSECONDS.sleep(3000);
+	//// } catch (InterruptedException e) {
+	//// e.printStackTrace();
+	//// }
+	// }
+	//
+	// }
+	// }
+
 	private void mergeButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_mergeButtonActionPerformed
+
 		final JFileChooser fileChooser = new JFileChooser();
 		fileChooser.setSelectedFile(new File("./merged_admin_store_to_shop_2016-06-19.xlsx"));
 		fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 		int returnVal = fileChooser.showSaveDialog(this);
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			File file = fileChooser.getSelectedFile();
-			final String fileName = file.getAbsolutePath();
 			progressBar.setStringPainted(true);
-			merge(directories);
+			try {
+				merge(directories);
+			} catch (IOException e) {
+				LOGGER.log(Level.SEVERE, null, e.getCause());
+			}
 		} else {
 			LOGGER.info(CANCEL_FILE_SELECTION);
 		}
@@ -306,6 +346,7 @@ public class MainWindow extends javax.swing.JPanel {
 	private javax.swing.JLabel storeLabel1;
 	private javax.swing.JTextField storeText;
 	// End of variables declaration//GEN-END:variables
+	private int i;
 
 	public void updateProgress(int percentDone) {
 		mergeButton.setEnabled(false);
@@ -318,15 +359,17 @@ public class MainWindow extends javax.swing.JPanel {
 
 	}
 
-	private void merge(final Map<String, String> directories) {
+	private void merge(final Map<String, String> directories) throws IOException {
+		i =0 ;
+		outputArea.setText("");
+		outputArea.repaint();
 		final long start = System.nanoTime();
 		System.out.println("Starting...");
-
 		mergeButton.setEnabled(false);
 		progressBar.setValue(0);
-		setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+		progressBar.repaint();
+		this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-		final MainWindow invoker = this;
 		SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
 
 			@Override
@@ -335,12 +378,13 @@ public class MainWindow extends javax.swing.JPanel {
 				int progress = 0;
 				final TaskDispatcher dipatcher = TaskDispatcher.INSTANCE;
 				dipatcher.setDirectories(directories);
+			//	taskComponent.chep(TaskDispatcher.INSTANCE);
 				try {
 					dipatcher.parseDirectories();
 				} catch (IllegalArgumentException e) {
 					e.printStackTrace();
 				}
-				List<Future<FileTask>> results = dipatcher.execute(invoker);
+				List<Future<FileTask>> results = dipatcher.execute(taskComponent);
 
 				setProgress(0);
 				int i = 0;
@@ -350,7 +394,7 @@ public class MainWindow extends javax.swing.JPanel {
 						final FileTask fileTask = task.get();
 						finishedTasks.add(fileTask);
 						progress += fileTask.getPercentDone();
-						i++;
+						//taskComponent.dispatchEvent(fileTask.getPercentDone());
 					} catch (InterruptedException | ExecutionException ex) {
 						ex.printStackTrace();
 					}
@@ -370,15 +414,31 @@ public class MainWindow extends javax.swing.JPanel {
 				mergeButton.setEnabled(true);
 				progressBar.setValue(100);
 				outputArea.append("Done!\n");
+				outputArea.setEditable(true);
 			}
 
 		};
+
 		worker.execute();
-		setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+		this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 		mergeButton.setEnabled(true);
 		final long end = System.nanoTime();
 		System.out.println("Finished in " + (end - start) / 1000 + " milli(s).");
 
+	}
+
+	@Override
+	public void percentDone(final TaskEvent evt) {
+		i++;
+		System.err.println("percentDone : " + i);
+		final int newValue = Math.min(progressBar.getValue() + evt.getProgress(), 100);
+		outputArea.append(evt.getMessage()+"\n");
+		progressBar.setValue(newValue);
+		progressBar.repaint();
+	}
+
+	interface TaskListener extends EventListener {
+		public void percentDone(TaskEvent evt);
 	}
 
 }

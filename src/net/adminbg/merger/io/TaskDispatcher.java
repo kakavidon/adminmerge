@@ -14,10 +14,10 @@ import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import net.adminbg.merger.ui.MainWindow;
-
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
+
+import net.adminbg.merger.ui.TaskComponent;
 
 public enum TaskDispatcher {
 
@@ -41,9 +41,7 @@ public enum TaskDispatcher {
 		}
 
 		for (String dirString : directories.keySet()) {
-			// for (String s : new File(dirString).list()){
-			// System.out.println(s);
-			// }
+	
 			Path dir = Paths.get(dirString);
 			if (!Files.exists(dir)) {
 				final String msg = "\"%s\" does not exists.";
@@ -63,7 +61,6 @@ public enum TaskDispatcher {
 				final String msg = "Directory \"%s\" does not contain any files with extension \"%s\". Aborting ...";
 				throw new IllegalArgumentException(String.format(msg, dirString, extension));
 			}
-			// dirs.add(dir);
 		}
 	}
 
@@ -86,13 +83,15 @@ public enum TaskDispatcher {
 		this.directories = new TreeMap<>(dirs);
 	}
 
-	public List<Future<FileTask>> execute(MainWindow invoker) {
+	public List<Future<FileTask>> execute(TaskComponent taskComponent) {
 		final TaskFactory taskFactory = TaskFactory.getInstance();
-		final List<FileTask<String, String>> tasks = taskFactory.createTasks(directories);
+
+		final List<FileTask> tasks = taskFactory.createTasks(directories);
 		taskFactory.setHeaderTask();
 		taskFactory.setPercentage();
 		final int size = taskFactory.counTasks();
-		final UpdatebleThreadPool executor = new UpdatebleThreadPool(size, invoker);
+		LOGGER.info(String.format("Total %d tasks submitted.", size));
+		final UpdatebleThreadPool executor = new UpdatebleThreadPool(size, taskComponent);
 		List<Future<FileTask>> result = new ArrayList<>();
 		try {
 			result = executor.invokeAll(tasks);
@@ -113,14 +112,14 @@ public enum TaskDispatcher {
 			shopMap.putAll(getHeaderMap(result));
 			shopMap.putAll(getShopMap(result));
 			storeMap.putAll(getStoreMap(result));
-
-			print10a(storeMap);
-			print10(shopMap);
+            
+//			print10a(storeMap);
+//			print10(shopMap);
 			storeMap.keySet().retainAll(shopMap.keySet());
 			LOGGER.info(storeMap.isEmpty() ? "Epmty" : "Not Empty");
 			LOGGER.info("File processed successfully. " + storeMap.size());
 			LOGGER.info("");
-			print10a(storeMap);
+//			print10a(storeMap);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
