@@ -6,28 +6,28 @@ import java.util.Map;
 
 public abstract class FileTask implements Callable<FileTask> {
 
-	private int percentDone;
-	private final Path file;
+    private int percentDone;
+    private final Path file;
 
-	public FileTask(final Path file) {
-		this.file = file;
+    public FileTask(final Path file) {
+        this.file = file;
 
-	}
+    }
 
-	public void setPercentDone(final int percentDone) {
-		this.percentDone = percentDone;
-	}
+    public void setPercentDone(final int percentDone) {
+        this.percentDone = percentDone;
+    }
 
-	public int getPercentDone() {
-		return percentDone;
-	}
+    public int getPercentDone() {
+        return percentDone;
+    }
 
-	public Path getFile() {
-		return this.file;
-	}
+    public Path getFile() {
+        return this.file;
+    }
 
-	abstract public Map getMap();
+    public abstract Map<?, ?> getMap();
 
-	abstract public int getWeight();
+    public abstract int getWeight();
 
 }

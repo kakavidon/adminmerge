@@ -3,197 +3,170 @@ package net.adminbg.merger.io;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 
+import net.adminbg.merger.logging.ApplicationLogger;
+import net.adminbg.merger.ui.SelectionInfo;
 import net.adminbg.merger.ui.TaskComponent;
 
 public enum TaskDispatcher {
 
-	INSTANCE;
-	private static final Logger LOGGER = Logger.getLogger(TaskDispatcher.class.getName());
-	private Map<String, String> directories = new TreeMap<>();
-	// private final List<Path> dirs = new ArrayList<>();
-	private final List<FileTask> fileTasks = new ArrayList<>();
+    INSTANCE;
+    private static final Logger LOGGER = ApplicationLogger.INSTANCE.getLogger(TaskDispatcher.class);
+    private Map<String, String> directories = new TreeMap<>();
+    private Set<SelectionInfo> selection = new TreeSet<>();
+//    private final List<FileTask> fileTasks = new ArrayList<>();
+    private Path targetFile;
 
-	public void parseDirectories() throws IOException {
+    public void parseDirectories() throws IOException {
+        if (directories.isEmpty()) {
+            throw new IllegalArgumentException("No directories selected. \nPlease, specify 2 valid directories.");
+        } else {
+            final int size = directories.size();
+            if (size != 2) {
+                throw new IllegalArgumentException(
+                        "Current version of the application supports processing\n"
+                        + " of 2 distinct directories. Your selections contains "
+                        + size + " .");
+            }
+        }
 
-		if (directories.isEmpty()) {
-			throw new IllegalArgumentException("No directories selected. Two valid directories are expected.");
-		} else {
-			final int size = directories.size();
-			if (size != 2) {
-				throw new IllegalArgumentException(
-						"Current version of the application supports processing of 2 distinct directories. Arguments passed = "
-								+ size);
-			}
-		}
+        for (String dirString : directories.keySet()) {
 
-		for (String dirString : directories.keySet()) {
-	
-			Path dir = Paths.get(dirString);
-			if (!Files.exists(dir)) {
-				final String msg = "\"%s\" does not exists.";
-				throw new IllegalArgumentException(String.format(msg, dirString));
-			}
-			if (!Files.isDirectory(dir)) {
-				final String msg = "\"%s\" is not a directory.";
-				throw new IllegalArgumentException(String.format(msg, dirString));
-			}
-			if (!Files.isReadable(dir)) {
-				final String msg = "Cannot read \"%s\".";
-				throw new IllegalArgumentException(String.format(msg, dirString));
+            Path dir = Paths.get(dirString);
+            try {
+                FileTest.validate(dir, FileTest.EXISTS, FileTest.IS_DIRECTORY, FileTest.READABLE);
+            } catch (MergeException ex) {
+                throw new IllegalArgumentException(ex);
+            }
 
-			}
-			final String extension = directories.get(dirString);
-			if (isEmpty(dirString, extension)) {
-				final String msg = "Directory \"%s\" does not contain any files with extension \"%s\". Aborting ...";
-				throw new IllegalArgumentException(String.format(msg, dirString, extension));
-			}
-		}
-	}
+            final String extension = directories.get(dirString);
+            if (isEmpty(dirString, extension)) {
+                final String msg = "Directory \"%s\"\n does not contain any files with extension \"%s\". Aborting ...";
+                throw new IllegalArgumentException(String.format(msg, dirString, extension));
+            }
+        }
+    }
 
-	private boolean isEmpty(final String dir, final String extension) {
-		File dirName = new File(dir);
-		FilenameFilter f = new FilenameFilter() {
+    private boolean isEmpty(final String dir, final String extension) {
+        File dirName = new File(dir);
+        FilenameFilter f = new FilenameFilter() {
+            @Override
+            public boolean accept(File arg0, String filename) {
+                return filename.endsWith(extension);
+            }
+        };
 
-			@Override
-			public boolean accept(File arg0, String filename) {
-				// System.out.println(filename);
-				return filename.endsWith(extension);
-			}
-		};
+        return dirName.listFiles(f).length == 0;
 
-		return dirName.listFiles(f).length == 0;
+    }
 
-	}
+    public void setSelection(final Set<SelectionInfo> selection) {
+        this.selection = new TreeSet<>(selection);
+        for (SelectionInfo s : selection) {
+            directories.put(s.getPath().toString(), s.getExtension());
+        }
+    }
 
-	public void setDirectories(final Map<String, String> dirs) {
-		this.directories = new TreeMap<>(dirs);
-	}
+    public List<Future<FileTask>> execute(TaskComponent taskComponent) throws MergeException {
+        final TaskFactory taskFactory = TaskFactory.getInstance();
 
-	public List<Future<FileTask>> execute(TaskComponent taskComponent) {
-		final TaskFactory taskFactory = TaskFactory.getInstance();
+        final List<FileTask> tasks = taskFactory.createTasks(selection);
+        taskFactory.setHeaderTask(tasks);
+        taskFactory.setPercentage();
+        final int size = taskFactory.counTasks();
+        LOGGER.info(String.format("Total %d tasks submitted.", size));
+        final ThreadPool executor = new ThreadPool(size, taskComponent);
+        List<Future<FileTask>> result = new ArrayList<>();
+        try {
+            result = executor.invokeAll(tasks);
+        } catch (InterruptedException | UnsupportedOperationException ex) {
+            LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
+            throw new MergeException(ex);
+        }
 
-		final List<FileTask> tasks = taskFactory.createTasks(directories);
-		taskFactory.setHeaderTask(tasks);
-		taskFactory.setPercentage();
-		final int size = taskFactory.counTasks();
-		LOGGER.info(String.format("Total %d tasks submitted.", size));
-		final UpdatebleThreadPool executor = new UpdatebleThreadPool(size, taskComponent);
-		List<Future<FileTask>> result = new ArrayList<>();
-		try {
-			result = executor.invokeAll(tasks);
-		} catch (InterruptedException ex) {
-			LOGGER.log(Level.SEVERE, null, ex);
-		}
+        executor.shutdown();
+        return result;
+    }
 
-		executor.shutdown();
-		return result;
-	}
+    public void mergeFiles(List<FileTask> finishedTasks) throws MergeException {
 
-	public void mergeFiles(List<FileTask> result) {
+        try {
+            LOGGER.info("Collecting results: ");
+            Map<String, String> storeMap = new TreeMap<>();
+            storeMap.putAll(getStoreMap(finishedTasks));
 
-		try {
-			LOGGER.info("Collecting results: ");
-			Map<String, String> storeMap = new TreeMap<>();
-			Map<String, XSSFRow> shopMap = new TreeMap<>();
-			shopMap.putAll(getHeaderMap(result));
-			shopMap.putAll(getShopMap(result));
-			storeMap.putAll(getStoreMap(result));
-            
-//			print10a(storeMap);
-//			print10(shopMap);
-			storeMap.keySet().retainAll(shopMap.keySet());
-			LOGGER.info(storeMap.isEmpty() ? "Epmty" : "Not Empty");
-			LOGGER.info("File processed successfully. " + storeMap.size());
-			LOGGER.info("");
-//			print10a(storeMap);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+            Map<String, XSSFRow> shopMap = new TreeMap<>();
+            List<XSSFRow> headerRows = getHeaderMapRows(finishedTasks);
+            shopMap.putAll(getShopMap(finishedTasks));
 
-	public void print10(Map<String, XSSFRow> map) {
-		System.out.println(map.size() + "");
-		int i = 0;
-		for (Map.Entry<String, XSSFRow> entrySet : map.entrySet()) {
-			if (i < 10) {
-				String key = entrySet.getKey();
-				XSSFRow row = entrySet.getValue();
-				final XSSFCell cell = row.getCell(17);
-				if (cell == null) {
-					System.out.println("key=" + key + " value NULL");
-				} else {
-					System.out.println("key = " + key + " value = " + cell.getStringCellValue());
-				}
-			}
-			i++;
-		}
-	}
+            final Merger merger = MergerFactory.getInstance().createMerger(getTargetFile(), storeMap, shopMap, headerRows);
+            merger.merge();
+            LOGGER.log(Level.INFO, "File processed successfully. {0}", storeMap.size());
+            LOGGER.info("");
 
-	public void print10a(Map<String, String> map) {
-		System.out.println(map.size() + "");
-		int i = 0;
-		for (Map.Entry<String, String> entrySet : map.entrySet()) {
-			if (i < 10) {
-				String key = entrySet.getKey();
-				String c = entrySet.getValue();
-				System.out.println("key = " + key + " value = " + c);
-			}
-			i++;
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, null, e);
+            throw new MergeException(e);
+        }
+    }
 
-		}
-	}
+    private Map<String, XSSFRow> getShopMap(List<FileTask> result) {
+        Map<String, XSSFRow> resultMap = new TreeMap<>();
+        for (FileTask fileTask : result) {
+            if (fileTask instanceof ReadXlsxFileTask) {
+                final Map<String, XSSFRow> map = ((ReadXlsxFileTask) fileTask).getMap();
+                resultMap.putAll(map);
 
-	private Map<String, XSSFRow> getHeaderMap(List<FileTask> result) {
-		Map<String, XSSFRow> resultMap = new TreeMap<>();
-		for (FileTask fileTask : result) {
-			if (fileTask instanceof ReadHeaderFileTask) {
-				final Map<String, XSSFRow> map = fileTask.getMap();
-				// final Map<String, XSSFRow> map = ((ReadHeaderFileTask)
-				// fileTask).getMap();
-				resultMap.putAll(map);
+            }
+        }
+        return resultMap;
+    }
 
-			}
-		}
-		return resultMap;
-	}
+    private Map<String, String> getStoreMap(List<FileTask> result) {
+        Map<String, String> resultMap = new TreeMap<>();
+        for (FileTask fileTask : result) {
+            if (fileTask instanceof ReadCsvFileTask) {
+                final Map<String, String> map = ((ReadCsvFileTask) fileTask).getMap();
+                resultMap.putAll(map);
 
-	private Map<String, XSSFRow> getShopMap(List<FileTask> result) {
+            }
+        }
+        return resultMap;
+    }
 
-		Map<String, XSSFRow> resultMap = new TreeMap<>();
-		for (FileTask fileTask : result) {
-			if (fileTask instanceof ReadXlsxFileTask) {
-				final Map<String, XSSFRow> map = ((ReadXlsxFileTask) fileTask).getMap();
-				resultMap.putAll(map);
+    public void setTargetFile(Path targetFile) {
+        this.targetFile = targetFile;
+    }
 
-			}
-		}
-		return resultMap;
-	}
+    public Path getTargetFile() {
+        return this.targetFile;
+    }
 
-	private Map<String, String> getStoreMap(List<FileTask> result) {
-		Map<String, String> resultMap = new TreeMap<>();
-		for (FileTask fileTask : result) {
-			if (fileTask instanceof ReadCsvFileTask) {
-				final Map<String, String> map = ((ReadCsvFileTask) fileTask).getMap();
-				resultMap.putAll(map);
+    private List<XSSFRow> getHeaderMapRows(List<FileTask> finishedTasks) {
+        List<XSSFRow> result = new ArrayList<>();
+        for (FileTask fileTask : finishedTasks) {
+            if (fileTask instanceof ReadHeaderFileTask) {
+                @SuppressWarnings("unchecked")
+				final Map<String, XSSFRow> map = (Map<String, XSSFRow>) fileTask.getMap();
 
-			}
-		}
-		return resultMap;
-	}
+                result.addAll(map.values());
+
+            }
+        }
+        return result;
+    }
 
 }

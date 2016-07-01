@@ -65,12 +65,12 @@ public enum FileTest {
 	},
 	NON_EMPTY {
 		@Override
-		public boolean check(Path target) throws InvalidFileException {
+		public boolean check(Path target) throws MergeException {
 			boolean nonEmpty = false;
 			try {
 				nonEmpty = Files.size(target) > 0;
 			} catch (IOException e) {
-				throw new InvalidFileException(e.getMessage(), e);
+				throw new MergeException(e.getMessage(), e);
 			}
 			if (!nonEmpty) {
 				final String msg = "\"%s\"  is empoty";
@@ -82,12 +82,12 @@ public enum FileTest {
 
 	private static String message;
 
-	public abstract boolean check(final Path target) throws InvalidFileException;
+	public abstract boolean check(final Path target) throws MergeException;
 
-	public static void validate(Path target, FileTest... tests) throws InvalidFileException {
+	public static void validate(Path target, FileTest... tests) throws MergeException {
 		for (FileTest test : tests) {
 			if (!test.check(target)) {
-				throw new InvalidFileException(message);
+				throw new MergeException(message);
 			}
 		}
 	}

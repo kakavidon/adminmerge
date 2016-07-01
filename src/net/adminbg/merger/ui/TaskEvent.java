@@ -4,37 +4,38 @@ import java.awt.AWTEvent;
 
 import javax.swing.JComponent;
 
+/**
+ * A simple AWTevent that shows percent done when a file read task is completed.
+ */
 public class TaskEvent extends AWTEvent {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1427372972454620242L;
 
-	public static final int TASK_EVENT = AWTEvent.RESERVED_ID_MAX + 5555;
+    private static final long serialVersionUID = 1427372972454620242L;
 
-	private int progress;
+    public static final int TASK_EVENT = AWTEvent.RESERVED_ID_MAX + 5555;
 
-	private String message;
+    private int progress;
 
-	public String getMessage() {
-		return message;
-	}
+    private String message;
 
-	public TaskEvent(JComponent parent) {
-		super(parent, TASK_EVENT);
-	}
+    public String getMessage() {
+        return message;
+    }
 
-	public int getProgress() {
-		return progress;
-	}
+    public TaskEvent(JComponent parent) {
+        super(parent, TASK_EVENT);
+    }
 
-	public void setProgress(final int progress) {
-		this.progress = progress;
-	}
+    public int getProgress() {
+        return progress;
+    }
 
-	public void setMessage(String message) {
-		this.message = message;
-		
-	}
+    public void setProgress(final int progress) {
+        this.progress = progress;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+
+    }
 
 }
