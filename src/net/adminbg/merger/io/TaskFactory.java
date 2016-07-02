@@ -8,148 +8,136 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import net.adminbg.merger.logging.ApplicationLogger;
 import net.adminbg.merger.ui.SelectionInfo;
+import static net.adminbg.merger.ui.Configuration.*;
 
 /**
- *
+ * 
+ * Creates tasks to process input files.
+ * 
  * @author kakavidon
  */
 final public class TaskFactory {
+	private static final ApplicationLogger appLog = ApplicationLogger.INSTANCE;
+	private static final Logger LOGGER = appLog.getLogger(TaskFactory.class);
+	private final List<FileTask<?, ?>> tasks = new ArrayList<>();
 
-    private static final Logger LOGGER = ApplicationLogger.INSTANCE.getLogger(TaskFactory.class);
-    private final List<FileTask> tasks = new ArrayList<>();
-    private final static ResourceBundle BUNDLE = java.util.ResourceBundle.getBundle("net/adminbg/properties");
+	private TaskFactory() {
+	}
 
-    private TaskFactory() {
-    }
+	public static TaskFactory getInstance() {
+		return TaskFactoryHolder.INSTANCE;
+	}
 
-    public static TaskFactory getInstance() {
-        return TaskFactoryHolder.INSTANCE;
-    }
+	public int counTasks() {
+		return tasks.size();
+	}
 
-    public int counTasks() {
-        return tasks.size();
-    }
+	private static class TaskFactoryHolder {
 
-    private static class TaskFactoryHolder {
+		private static final TaskFactory INSTANCE = new TaskFactory();
+	}
 
-        private static final TaskFactory INSTANCE = new TaskFactory();
-    }
+	public List<FileTask<?, ?>> createTasks(final Set<SelectionInfo> selection)
+			throws MergeException {
 
-    public List<FileTask> createTasks(final Set<SelectionInfo> selection)  throws MergeException {
+		LOGGER.info(CREATE_TASKS);
 
-        LOGGER.info(BUNDLE.getString("CREATE_TASK_MSG"));
-        //
-        reset();
-        final ArrayList<FileTask> newTasks = new ArrayList<>();
-        for (SelectionInfo s : selection) {
-            final Path dir = s.getPath();
-            final String className = s.getClassName();
-            final String extension = s.getExtension();
-            newTasks.addAll(buildTasks(dir, className, extension));
-        }
-//        for (Map.Entry<String, String> e : dirs.entrySet()) {
-//            newTasks.addAll(buildTasks(e.getKey(), e.getValue()));
-//        }
-        return newTasks;
-    }
+		reset();
+		final ArrayList<FileTask<?, ?>> newTasks = new ArrayList<>();
+		for (SelectionInfo s : selection) {
+			final Path dir = s.getPath();
+			final String className = s.getClassName();
+			final String extension = s.getExtension();
+			newTasks.addAll(buildTasks(dir, className, extension));
+		}
 
-    private List<FileTask> buildTasks(final Path directory, final String className, final String ext) throws MergeException {
-        final List<FileTask> localTasks = new ArrayList<>();
-        LOGGER.log(Level.INFO, BUNDLE.getString("BUILDING_TASK_MSG"), directory);
-        try {
-            for (Path file : listFiles(directory.toString(), ext)) {
-                final Class<?> classInstcnce =  Class.forName(className);
-                @SuppressWarnings("unchecked")
-				final Constructor<FileTask> constructor = (Constructor<FileTask>) classInstcnce.getConstructor(Path.class);
-                localTasks.add((FileTask) constructor.newInstance(file));
-            }
+		return newTasks;
+	}
 
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
-            LOGGER.log(Level.SEVERE, String.format("Unable to create instance of %s.", className), ex);
-            throw new MergeException(ex);
-        }
-//        
-//        for (Path file : listFiles(directory, extension)) {
-//            switch (extension) {
-//                case ".csv":
-//                    LOGGER.log(Level.INFO, BUNDLE.getString("NEW_READCSVFILETASK_FOR"), file);
-//                    localTasks.add(new ReadCsvFileTask(file));
-//                    break;
-//                case ".xlsx":
-//                    localTasks.add(new ReadXlsxFileTask(file));
-//                    LOGGER.log(Level.INFO, BUNDLE.getString("NEW_READXLSXFILETASK_MSG"), file);
-//                    break;
-//                default:
-//                    throw new UnsupportedOperationException(java.text.MessageFormat.format(BUNDLE.getString("UNSUPPORTED_EXTENSION_ERROR"), new Object[]{extension}));
-//            }
-//
-//        }
-        this.tasks.addAll(new ArrayList<>(localTasks));
-        return localTasks;
-    }
+	private List<FileTask<?, ?>> buildTasks(final Path directory,
+			final String className, final String ext) throws MergeException {
+		final List<FileTask<?, ?>> localTasks = new ArrayList<>();
+		LOGGER.log(Level.INFO, BUILD_TASKS, directory);
+		try {
+			for (Path file : listFiles(directory.toString(), ext)) {
+				final Class<?> classInstcnce = Class.forName(className);
+				@SuppressWarnings("unchecked")
+				final Constructor<FileTask<?, ?>> constructor = (Constructor<FileTask<?, ?>>) classInstcnce
+						.getConstructor(Path.class);
+				localTasks.add((FileTask<?, ?>) constructor.newInstance(file));
+			}
 
-    public List<Path> listFiles(final String dir, final String extension) {
-        List<Path> result = new ArrayList<>();
-        FilenameFilter f = new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String file) {
-                return file.endsWith(extension);
-            }
-        };
+		} catch (ClassNotFoundException | InstantiationException
+				| IllegalAccessException | NoSuchMethodException
+				| SecurityException | IllegalArgumentException
+				| InvocationTargetException ex) {
+			final String msg = String.format(ERROR_INSTANCE, className);
+			LOGGER.log(Level.SEVERE, msg, ex);
+			throw new MergeException(ex);
+		}
+		this.tasks.addAll(new ArrayList<>(localTasks));
+		return localTasks;
+	}
 
-        final List<String> list = Arrays.asList(new File(dir).list(f));
-        for (String str : list) {
-            result.add(Paths.get(dir + "/" + str));
-        }
-        return result;
-    }
+	public List<Path> listFiles(final String dir, final String extension) {
+		List<Path> result = new ArrayList<>();
+		FilenameFilter f = new FilenameFilter() {
+			@Override
+			public boolean accept(File dir, String file) {
+				return file.endsWith(extension);
+			}
+		};
 
-    public Path getExcelFile() {
-        for (FileTask task : tasks) {
-            if (task instanceof ReadXlsxFileTask) {
-                return task.getFile();
-            }
-        }
-        return null;
-    }
+		final List<String> list = Arrays.asList(new File(dir).list(f));
+		for (String str : list) {
+			final String dirStr = String.format("%s%s%s", dir, SLASH, str);
+			result.add(Paths.get(dirStr));
+		}
+		return result;
+	}
 
-    public void setPercentage() {
-        LOGGER.info(BUNDLE.getString("CALCULATING_PERCENTAGE"));
-        final int total = 100;
-        final int size = tasks.size()+1;
-        final int percentDone = total / size;
-        int reminder = total - percentDone * size;
-        LOGGER.log(Level.INFO, "Percentage = {0} total = {1}", new Object[]{percentDone, percentDone * size});
+	public Path getExcelFile() {
+		for (FileTask<?, ?> task : tasks) {
+			if (task instanceof ReadXlsxFileTask) {
+				return task.getFile();
+			}
+		}
+		return null;
+	}
 
-        for (FileTask task : tasks) {
-            task.setPercentDone(percentDone);
-        }
-        final FileTask lastTask = tasks.get(tasks.size() - 1);
-        lastTask.setPercentDone(reminder + percentDone);
-        LOGGER.log(Level.INFO, "Size {0}", tasks.size());
-        LOGGER.log(Level.INFO, "Last task percent {0}", lastTask.getPercentDone());
-    }
+	public void setPercentage() {
+		LOGGER.info(CALCULATE);
+		final int total = 100;
+		final int size = tasks.size() + 1;
+		final int percentDone = total / size;
+		int reminder = total - percentDone * size;
+		LOGGER.log(Level.INFO, PROGRESS, new Object[] { percentDone,
+				percentDone * size });
 
-    public void setHeaderTask(List<FileTask> tasks) {
-        LOGGER.info("Adding the header row.");
-        final Path excelFile = getExcelFile();
-        tasks.add(new ReadHeaderFileTask(excelFile));
-    }
+		for (FileTask<?, ?> task : tasks) {
+			task.setPercentDone(percentDone);
+		}
+		final FileTask<?, ?> lastTask = tasks.get(tasks.size() - 1);
+		lastTask.setPercentDone(reminder + percentDone);
+		LOGGER.log(Level.INFO, SIZE, tasks.size());
+		LOGGER.log(Level.INFO, TASK, lastTask.getPercentDone());
+	}
 
-    private void reset() {
-        for (Iterator<FileTask> it = this.tasks.iterator(); it.hasNext();) {
-            FileTask task = it.next();
-            task = null;
-        }
-        this.tasks.clear();
-        
-    }
+	public void setHeaderTask(List<FileTask<?, ?>> tasks) {
+		LOGGER.info(HEADER);
+		final Path excelFile = getExcelFile();
+		tasks.add(new ReadHeaderFileTask(excelFile));
+	}
+
+	private void reset() {
+		this.tasks.clear();
+
+	}
 }

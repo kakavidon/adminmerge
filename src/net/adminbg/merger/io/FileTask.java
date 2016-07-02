@@ -1,33 +1,46 @@
 package net.adminbg.merger.io;
 
 import java.nio.file.Path;
-import java.util.concurrent.Callable;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
-public abstract class FileTask implements Callable<FileTask> {
+/**
+ * 
+ * Abstract file manipulation task. Extracts a map with unique keys and lookup
+ * values.
+ * 
+ * @author kakavidon
+ * 
+ * @param <U> the type of the key 
+ * @param <V> the type of the value 
+ */
 
-    private int percentDone;
-    private final Path file;
+public abstract class FileTask<U, V> implements Callable<FileTask<U, V>> {
 
-    public FileTask(final Path file) {
-        this.file = file;
+	private int percentDone;
+	private final Path file;
 
-    }
+	public FileTask(final Path file) {
+		this.file = file;
 
-    public void setPercentDone(final int percentDone) {
-        this.percentDone = percentDone;
-    }
+	}
 
-    public int getPercentDone() {
-        return percentDone;
-    }
+	public void setPercentDone(final int percentDone) {
+		this.percentDone = percentDone;
+	}
 
-    public Path getFile() {
-        return this.file;
-    }
+	public int getPercentDone() {
+		return percentDone;
+	}
 
-    public abstract Map<?, ?> getMap();
+	public Path getFile() {
+		return this.file;
+	}
 
-    public abstract int getWeight();
+	public abstract Map<U, V> getMap();
+
+	public abstract int getWeight();
+
+	public abstract FileTask<U, V> call() throws MergeException;
 
 }

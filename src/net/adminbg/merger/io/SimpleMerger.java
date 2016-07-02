@@ -1,5 +1,12 @@
-
 package net.adminbg.merger.io;
+
+import static net.adminbg.merger.ui.Configuration.DOT;
+import static net.adminbg.merger.ui.Configuration.ESCAPED_DOT;
+import static net.adminbg.merger.ui.Configuration.MESSAGE_NO_CHANGE_1;
+import static net.adminbg.merger.ui.Configuration.MESSAGE_NO_CHANGE_2;
+import static net.adminbg.merger.ui.Configuration.MESSAGE_NO_CHANGE_3;
+import static net.adminbg.merger.ui.Configuration.MESSAGE_START;
+import static net.adminbg.merger.ui.Configuration.MESSAGE_SUCCESS;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -9,7 +16,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import net.adminbg.merger.logging.ApplicationLogger;
+
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
@@ -18,17 +27,27 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
- *
+ * 
+ * This class will match exactly (literally) the keys from the source files and
+ * then will lookup and replace the target values.
+ * 
  * @author lnedelc
  */
 public class SimpleMerger extends Merger {
+	private static final ApplicationLogger appLog = ApplicationLogger.INSTANCE;
+	private static final Logger LOGGER = appLog.getLogger(SimpleMerger.class);
 
-	private static final Logger LOGGER = ApplicationLogger.INSTANCE.getLogger(SimpleMerger.class);
-
-	public SimpleMerger(Path targetFile, Map<?, ?> firstDirRows, Map<?, ?> secondDirRows,
-			final List<XSSFRow> headerRows) {
+	public SimpleMerger(Path targetFile, Map<?, ?> firstDirRows,
+			Map<?, ?> secondDirRows, final List<XSSFRow> headerRows) {
 		super(targetFile, firstDirRows, secondDirRows, headerRows);
 	}
+
+	/**
+	 * 
+	 * Matches the source files by a key value. If a match is found the quantity
+	 * is replaced and row is inserted into the result file.
+	 * 
+	 */
 
 	@Override
 	public void merge() throws MergeException {
@@ -41,24 +60,30 @@ public class SimpleMerger extends Merger {
 			firstDirRows.keySet().retainAll(secondDirRowsRows.keySet());
 
 			if (firstDirRows.isEmpty()) {
-				final String msg = "There are no changes detectd. Either \n" + "there is no match by key or nothing "
-						+ "was changed.";
+				final String msg = MESSAGE_NO_CHANGE_1 + MESSAGE_NO_CHANGE_2
+						+ MESSAGE_NO_CHANGE_3;
 				LOGGER.warning(msg);
 				throw new MergeException(msg);
 			}
-
-			final XSSFSheet sheet = book.createSheet("Products");
+			final XSSFRow firstRow = secondDirRowsRows.values().iterator()
+					.next();
+			final XSSFSheet sheet = book.createSheet(firstRow.getSheet()
+					.getSheetName());
 
 			final List<XSSFRow> headerRows = getHeaderRows();
 			int rowIndex = copyRows(book, sheet, headerRows);
-			LOGGER.log(Level.INFO, "Starting processing of {0} matches", firstDirRows.size());
+			LOGGER.log(Level.INFO, MESSAGE_START, firstDirRows.size());
+			int lookups = 0;
 			for (Map.Entry<String, String> entry : firstDirRows.entrySet()) {
 				final String key = entry.getKey();
-				final String value = entry.getValue();
+				String value = entry.getValue();
+				if (value.contains(DOT)) {
+					value = value.split(ESCAPED_DOT, 2)[0];
+				}
 				final Integer intValue = Integer.valueOf(value);
 				final XSSFRow row = sheet.createRow(rowIndex);
 				final XSSFRow oldRow = secondDirRowsRows.get(key);
-				final XSSFCell cell = oldRow.getCell(15);
+				final XSSFCell cell = oldRow.getCell(17);
 				if (cell == null) {
 					continue;
 				}
@@ -66,21 +91,38 @@ public class SimpleMerger extends Merger {
 				if (quantity == intValue) {
 					continue;
 				}
+				lookups++;
 				copyRow(book, sheet, oldRow, row, quantity);
 				rowIndex++;
 			}
 
 			book.write(out);
-			LOGGER.log(Level.INFO, "Merging finished successfully.");
+			LOGGER.log(Level.INFO, MESSAGE_SUCCESS, lookups);
 		} catch (IOException ex) {
 			throw new MergeException(ex);
 
 		}
 
-	}//
+	}
 
-	protected void copyRow(final XSSFWorkbook destinationWorkbook, final XSSFSheet sheet, final XSSFRow oldRow,
-			final XSSFRow newRow, int newQuantity) {
+	/**
+	 * Copies an excel row from one workbook to another. Also replaces the
+	 * quantity value.
+	 * 
+	 * @param destinationWorkbook
+	 *            Destination Workbook
+	 * @param sheet
+	 *            Destination sheet
+	 * @param oldRow
+	 *            original row
+	 * @param newRow
+	 *            new row
+	 * @param newQuantity
+	 *            new quantity
+	 */
+	protected void copyRow(final XSSFWorkbook destinationWorkbook,
+			final XSSFSheet sheet, final XSSFRow oldRow, final XSSFRow newRow,
+			int newQuantity) {
 		for (int cellIndx = 0; cellIndx < oldRow.getLastCellNum(); cellIndx++) {
 			// Grab a copy of the old/new cell
 			XSSFCell oldCell = oldRow.getCell(cellIndx);
@@ -111,8 +153,22 @@ public class SimpleMerger extends Merger {
 		}
 	}
 
-	protected void copyRow(final XSSFWorkbook destinationWorkbook, final XSSFSheet sheet, final XSSFRow oldRow,
-			final XSSFRow newRow) {
+	/**
+	 * Copies an excel row from one workbook to another. quantity value.
+	 * 
+	 * @param destinationWorkbook
+	 *            Destination Workbook
+	 * @param sheet
+	 *            Destination sheet
+	 * @param oldRow
+	 *            original row
+	 * @param newRow
+	 *            new row
+	 * @param newQuantity
+	 *            new quantity
+	 */
+	protected void copyRow(final XSSFWorkbook destinationWorkbook,
+			final XSSFSheet sheet, final XSSFRow oldRow, final XSSFRow newRow) {
 		for (int cellIndx = 0; cellIndx < oldRow.getLastCellNum(); cellIndx++) {
 			// Grab a copy of the old/new cell
 			XSSFCell oldCell = oldRow.getCell(cellIndx);
@@ -141,8 +197,20 @@ public class SimpleMerger extends Merger {
 		}
 	}
 
-	protected int copyRows(final XSSFWorkbook destinationWorkbook, final XSSFSheet sheet,
-			final List<XSSFRow> headerRow) {
+	/**
+	 * 
+	 * Copy header rows from one workbook to another.
+	 * 
+	 * @param destinationWorkbook
+	 *            Destination Workbook
+	 * @param sheet
+	 *            new sheet
+	 * @param headerRow
+	 *            header row(s)
+	 * @return
+	 */
+	protected int copyRows(final XSSFWorkbook destinationWorkbook,
+			final XSSFSheet sheet, final List<XSSFRow> headerRow) {
 		int result = 0;
 		for (XSSFRow oldRow : headerRow) {
 			final XSSFRow newRow = sheet.createRow(result);
@@ -152,6 +220,14 @@ public class SimpleMerger extends Merger {
 		return result;
 	}
 
+	/**
+	 * Sets a value to a new cell
+	 * 
+	 * @param oldCell
+	 *            original cell
+	 * @param newCell
+	 *            a new cell
+	 */
 	protected void setCellValue(XSSFCell oldCell, XSSFCell newCell) {
 		// Set the cell data value
 		switch (oldCell.getCellType()) {
@@ -175,6 +251,14 @@ public class SimpleMerger extends Merger {
 			break;
 		}
 	}
+
+	/**
+	 * Extracts an integer value from a cell
+	 * 
+	 * @param cell
+	 *            the cell
+	 * @return the integer value from the cell
+	 */
 
 	private int getCellValue(XSSFCell cell) {
 		int result = -1;

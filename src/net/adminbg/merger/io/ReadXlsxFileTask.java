@@ -1,35 +1,47 @@
 package net.adminbg.merger.io;
 
+import static net.adminbg.merger.ui.Configuration.READXLSXFILETASK_MESSAGE_FAIL;
+import static net.adminbg.merger.ui.Configuration.READXLSXFILETASK_MESSAGE_NEW;
+
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.adminbg.merger.logging.ApplicationLogger;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
+import net.adminbg.merger.logging.ApplicationLogger;
+
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
- *
+ * 
+ * Reads an excel file. Puts the key field as key in the result map. Puts entire
+ * excel row as a value into the result map. Duplicate keys and empty keys are
+ * ignored.
+ * 
  * @author kakavidon
  */
-public class ReadXlsxFileTask extends FileTask {
-
-	private static final Logger LOGGER = ApplicationLogger.INSTANCE.getLogger(ReadXlsxFileTask.class);
+public class ReadXlsxFileTask extends FileTask<String, XSSFRow> {
+	private static final ApplicationLogger appLog = ApplicationLogger.INSTANCE;
+	private static final Logger LOGGER = appLog
+			.getLogger(ReadXlsxFileTask.class);
 
 	private final int START_FROM = 1;
+	private final int CELL_KEY_INDEX = 3;
 
 	private final Map<String, XSSFRow> map = new TreeMap<>();
 
 	public ReadXlsxFileTask(final Path file) {
 		super(file);
-		LOGGER.log(Level.INFO, "New instance of ReadXlsxFileTask created.");
+		LOGGER.log(Level.INFO, READXLSXFILETASK_MESSAGE_NEW);
 	}
 
 	@Override
@@ -38,10 +50,12 @@ public class ReadXlsxFileTask extends FileTask {
 	}
 
 	@Override
-	public FileTask call() throws MergeException {
+	public FileTask<String, XSSFRow> call() throws MergeException {
 		int rIndex = 0;
 
-		try (final XSSFWorkbook xlsx = new XSSFWorkbook(getFile().toFile());) {
+		final File file = getFile().toFile();
+		try (final XSSFWorkbook xlsx = (XSSFWorkbook) WorkbookFactory
+				.create(file);) {
 			final XSSFSheet sheet = xlsx.getSheetAt(0);
 			for (int rowIndex = START_FROM; rowIndex < sheet.getLastRowNum(); rowIndex++) {
 				final XSSFRow row = sheet.getRow(rowIndex);
@@ -49,17 +63,16 @@ public class ReadXlsxFileTask extends FileTask {
 				if (row == null) {
 					continue;
 				}
-				final XSSFCell cell = row.getCell(13);
+
+				final XSSFCell cell = row.getCell(CELL_KEY_INDEX);
 				if (cell == null) {
 					continue;
 				}
-
 				map.put(readString(cell), row);
-
 			}
 
 		} catch (IOException | IllegalStateException | InvalidFormatException e) {
-			LOGGER.log(Level.SEVERE, "Failed to read \"{0}\" at row {1}. ",
+			LOGGER.log(Level.SEVERE, READXLSXFILETASK_MESSAGE_FAIL,
 					new Object[] { getFile().toString(), rIndex });
 			throw new MergeException(e);
 		}
@@ -67,14 +80,14 @@ public class ReadXlsxFileTask extends FileTask {
 	}
 
 	private String readString(final XSSFCell cell) {
-		String result = "";
+		String result = ""; //$NON-NLS-1$
 		switch (cell.getCellType()) {
 		case Cell.CELL_TYPE_NUMERIC:
 			final double numericCellValue = cell.getNumericCellValue();
 			result = String.valueOf(numericCellValue);
 			break;
 		case Cell.CELL_TYPE_BLANK:
-			result = "";
+			result = ""; //$NON-NLS-1$
 			break;
 		case Cell.CELL_TYPE_STRING:
 			result = cell.getStringCellValue();
@@ -82,8 +95,8 @@ public class ReadXlsxFileTask extends FileTask {
 		default:
 			break;
 		}
-		if (result.contains(".")) {
-			result = result.split("\\.", 2)[0];
+		if (result.contains(".")) { //$NON-NLS-1$
+			result = result.split("\\.", 2)[0]; //$NON-NLS-1$
 		}
 		return result;
 	}

@@ -3,56 +3,79 @@ package net.adminbg.merger.io;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import net.adminbg.merger.logging.ApplicationLogger;
+
 import org.apache.poi.xssf.usermodel.XSSFRow;
 
 /**
- *
- * @author lnedelc
+ * 
+ * Abstract class that defines the way how the source data should be combined.
+ * The descendants of this class will determine the algorithm how to match rows
+ * from the one source to the other.
+ * 
+ * @author kakavidon
+ * 
  */
-public abstract class Merger{
+public abstract class Merger {
 
-    private static final Logger LOGGER = ApplicationLogger.INSTANCE.getLogger(Merger.class);
-    private final Path targetFile;
-    private final Map<?, ?> secondDirRows;
-    private final Map<?, ?> firstDirRows;
-    private final List<XSSFRow> headerRows;
+	private final Path targetFile;
+	private final Map<?, ?> secondDirRows;
+	private final Map<?, ?> firstDirRows;
+	private final List<XSSFRow> headerRows;
 
-    public Merger(Path targetFile, Map<?, ?> firstDirRows, Map<?, ?> secondDirRows, final List<XSSFRow> headerRow) {
-        LOGGER.log( Level.INFO, "Creating merger for file {0} .", targetFile);
-        this.targetFile = targetFile;
-        this.firstDirRows = firstDirRows;
-        this.secondDirRows = secondDirRows;
-        this.headerRows = headerRow;
-    }
+	public Merger(Path targetFile, Map<?, ?> firstDirRows,
+			Map<?, ?> secondDirRows, final List<XSSFRow> headerRow) {
+		this.targetFile = targetFile;
+		this.firstDirRows = firstDirRows;
+		this.secondDirRows = secondDirRows;
+		this.headerRows = headerRow;
+	}
 
-    abstract public void merge() throws MergeException;
+	/**
+	 * 
+	 * Merges the rows collected from the source directories into the resulting
+	 * file.
+	 * 
+	 * @throws MergeException
+	 *             if something went wrong
+	 */
+	abstract public void merge() throws MergeException;
 
-    /**
-     * @return the targetFile
-     */
-    public Path getTargetFile() {
-        return targetFile;
-    }
+	/**
+	 * 
+	 * Returns the target file.
+	 * 
+	 * @return the targetFile
+	 */
+	public Path getTargetFile() {
+		return targetFile;
+	}
 
-    public Map<?, ?> getFirstDirRows() {
-        return firstDirRows;
-    }
+	/**
+	 * Returns the rows collected from the first directory.
+	 * 
+	 * @return the rows
+	 */
+	public Map<?, ?> getFirstDirRows() {
+		return firstDirRows;
+	}
 
-    /**
-     * @return the rows
-     */
-    public Map<?, ?> getSecondDirRows() {
-        return secondDirRows;
-    }
+	/**
+	 * 
+	 * Returns the rows collected from the second directory.
+	 * 
+	 * @return the rows
+	 */
+	public Map<?, ?> getSecondDirRows() {
+		return secondDirRows;
+	}
 
-    /**
-     * @return the headerRow
-     */
-    public List<XSSFRow> getHeaderRows() {
-        return headerRows;
-    }
+	/**
+	 * Returns the header rows collected .
+	 * 
+	 * @return the headerRow
+	 */
+	public List<XSSFRow> getHeaderRows() {
+		return headerRows;
+	}
 
 }

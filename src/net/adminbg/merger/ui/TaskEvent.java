@@ -5,7 +5,9 @@ import java.awt.AWTEvent;
 import javax.swing.JComponent;
 
 /**
+ * 
  * A simple AWTevent that shows percent done when a file read task is completed.
+ * 
  */
 public class TaskEvent extends AWTEvent {
 
