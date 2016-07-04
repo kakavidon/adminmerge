@@ -115,6 +115,13 @@ public enum Configuration {
 	public final static String DIALOG_CAPTION;
 	public final static String MESSAGE_FAIL;
 
+	public final static String XLSX_CELL_KEY_INDEX;
+	public final static String XLSX_START_FROM;
+	public final static String XLSX_NUMBER_FORMAT_ERROR;
+	
+	public final static String XLSX_HEADER_ROW_COUNT;
+	public final static String XLSX_HEADER_START_FROM;
+
 	private static Logger LOGGER;
 
 	static {
@@ -122,17 +129,13 @@ public enum Configuration {
 		BTN_EXIT = Messages.getString("MainWindow.btn.exit");
 		BTN_MERGE = Messages.getString("MainWindow.btn.merge");
 		BTN_OPEN = Messages.getString("MainWindow.btn.open");
-		CANCEL_FILE_SELECTION = Messages
-				.getString("MainWindow.cancel.file.selection");
-		FILE_READ_ERROR_CAPTION = Messages
-				.getString("MainWindow.file.read.error.caption");
+		CANCEL_FILE_SELECTION = Messages.getString("MainWindow.cancel.file.selection");
+		FILE_READ_ERROR_CAPTION = Messages.getString("MainWindow.file.read.error.caption");
 		LBL_STORE = Messages.getString("MainWindow.lbl.store");
 		LBL_SHOP = Messages.getString("MainWindow.lbl.shop");
 		NEW_LINE = Messages.getString("MainWindow.new.line");
-		TEXTAREA_LOG_MESSAGE_SHOP = Messages
-				.getString("MainWindow.textarea.log.message.shop");
-		TEXTAREA_LOG_MESSAGE_STORE = Messages
-				.getString("MainWindow.textarea.log.message.store");
+		TEXTAREA_LOG_MESSAGE_SHOP = Messages.getString("MainWindow.textarea.log.message.shop");
+		TEXTAREA_LOG_MESSAGE_STORE = Messages.getString("MainWindow.textarea.log.message.store");
 		UI_STYLE = Messages.getString("MainWindow.ui.style");
 		IS_DEVELOPMENT = Messages.getString("AdminLogger.is.development");
 		SHOP_TASK_CLASS = Messages.getString("shop.task.class");
@@ -143,8 +146,7 @@ public enum Configuration {
 		DB_JDBC_MAX_CONNECTIONS = Messages.getString("db.jdbc.max.connections");
 		STORE_TABLE_NAME = Messages.getString("store.table.name");
 		STORE_TABLE_COLUMNS = Messages.getString("store.table.columns");
-		STORE_TABLE_COLUMN_TYPES = Messages
-				.getString("store.table.column.types");
+		STORE_TABLE_COLUMN_TYPES = Messages.getString("store.table.column.types");
 		SHOP_TABLE_NAME = Messages.getString("shop.table.name");
 		SHOP_TABLE_COLUMNS = Messages.getString("shop.table.columns");
 		SHOP_TABLE_COLUMN_TYPES = Messages.getString("shop.table.column.types");
@@ -154,87 +156,54 @@ public enum Configuration {
 		CELL_INDECIES = Messages.getString("shop.csv.cell.indicies");
 		STORE_EXT = Messages.getString("store.ext");
 		SHOP_EXT = Messages.getString("shop.ext");
-		APPLICATION_WELCOME_MESSAGE = Messages
-				.getString("Application.welcome.message");
+		APPLICATION_WELCOME_MESSAGE = Messages.getString("Application.welcome.message");
 		APPLICATION_INFO = Messages.getString("Application.info.message");
-		FILETEST_MESSAGE_CANNOT_READ = Messages
-				.getString("FileTest.message.cannot.read");
-		FILETEST_MESSAGE_CANNOT_COUNT = Messages
-				.getString("FileTest.message.cannot.count");
-		FILETEST_MESSAGE_CANNOT_WRITE = Messages
-				.getString("FileTest.message.cannot.write");
+		FILETEST_MESSAGE_CANNOT_READ = Messages.getString("FileTest.message.cannot.read");
+		FILETEST_MESSAGE_CANNOT_COUNT = Messages.getString("FileTest.message.cannot.count");
+		FILETEST_MESSAGE_CANNOT_WRITE = Messages.getString("FileTest.message.cannot.write");
 		EMPTY_STRING = Messages.getString("FileTest.message.empty.string");
-		FILETEST_MESSAGE_INVALID_EXTENSION = Messages
-				.getString("FileTest.message.invalid.extension");
-		FILETEST_MESSAGE_IS_EMPTY = Messages
-				.getString("FileTest.message.is.empty");
-		FILETEST_MESSAGE_NOT_DIR = Messages
-				.getString("FileTest.message.not.dir=");
-		FILETEST_MESSAGE_NOT_EXISTS = Messages
-				.getString("FileTest.message.not.exists");
-		FILETEST_MESSAGE_NOT_REGULAR_FILE = Messages
-				.getString("FileTest.message.not.regular.file");
-		MERGER_MESSAGES_CONSTRUCTOR = Messages
-				.getString("Merger.messages.constructor");
+		FILETEST_MESSAGE_INVALID_EXTENSION = Messages.getString("FileTest.message.invalid.extension");
+		FILETEST_MESSAGE_IS_EMPTY = Messages.getString("FileTest.message.is.empty");
+		FILETEST_MESSAGE_NOT_DIR = Messages.getString("FileTest.message.not.dir=");
+		FILETEST_MESSAGE_NOT_EXISTS = Messages.getString("FileTest.message.not.exists");
+		FILETEST_MESSAGE_NOT_REGULAR_FILE = Messages.getString("FileTest.message.not.regular.file");
+		MERGER_MESSAGES_CONSTRUCTOR = Messages.getString("Merger.messages.constructor");
 		LOG_DIR = Messages.getString("ApplicationLogger.log.dir");
 		LOG_FILE = Messages.getString("ApplicationLogger.log.file");
 		ERROR_LOG_FILE = Messages.getString("ApplicationLogger.error.log.file");
 		MERGERFACTORY_MESSAGE = Messages.getString("MergerFactory.message");
 		MERGER_CLASS = Messages.getString("Merger.class");
 		MERGER_EXCEPTION = Messages.getString("Merger.exception");
-		MESSAGE_NO_CHANGE_1 = Messages
-				.getString("SimpleMerger.message.no.change.1");
-		MESSAGE_NO_CHANGE_2 = Messages
-				.getString("SimpleMerger.message.no.change.2");
-		MESSAGE_NO_CHANGE_3 = Messages
-				.getString("SimpleMerger.message.no.change.3");
+		MESSAGE_NO_CHANGE_1 = Messages.getString("SimpleMerger.message.no.change.1");
+		MESSAGE_NO_CHANGE_2 = Messages.getString("SimpleMerger.message.no.change.2");
+		MESSAGE_NO_CHANGE_3 = Messages.getString("SimpleMerger.message.no.change.3");
 		MESSAGE_START = Messages.getString("SimpleMerger.message.start");
 		DOT = Messages.getString("SimpleMerger.dot");
 		ESCAPED_DOT = Messages.getString("SimpleMerger.escaped.dot");
 		MESSAGE_SUCCESS = Messages.getString("SimpleMerger.message.success");
 		MEGRE_END = Messages.getString("MainWindow.megre.end");
-		THREADPOOL_SUCCESS_MESSAGE = Messages
-				.getString("ThreadPool.message.success");
-		THREADPOOL_ERROR_MESSAGE = Messages
-				.getString("ThreadPool.message.error");
-		READCSVFILETASK_MESSAGE_NEW = Messages
-				.getString("ReadCsvFileTask.message.new");
-		READCSVFILETASK_CSV_CHARSET = Messages
-				.getString("ReadCsvFileTask.csv.charset");
-		READCSVFILETASK_CSV_DEIMITER = Messages
-				.getString("ReadCsvFileTask.csv.deimiter");
-		READCSVFILETASK_ERROR_INVALID = Messages
-				.getString("ReadCsvFileTask.error.invalid");
-		READCSVFILETASK_MESSAGE_FAIL = Messages
-				.getString("ReadCsvFileTask.message.fail");
-		READHEADERFILETASK_MESSAGE_NEW = Messages
-				.getString("ReadHeaderFileTask.message.new");
-		READHEADERFILETASK_MESSAGE_COPY = Messages
-				.getString("ReadHeaderFileTask.message.copy");
-		READXLSXFILETASK_MESSAGE_NEW = Messages
-				.getString("ReadXlsxFileTask.message.new");
-		READXLSXFILETASK_MESSAGE_FAIL = Messages
-				.getString("ReadXlsxFileTask.message.fail");
-		TASKDISPATCHER_MESSAGE_SUBMIT = Messages
-				.getString("TaskDispatcher.message.submit");
-		TASKDISPATCHER_MESSAGE_FINISHED = Messages
-				.getString("TaskDispatcher.message.finished");
-		TASKDISPATCHER_MESSAGE_MISSING_1 = Messages
-				.getString("TaskDispatcher.message.missing.1");
-		TASKDISPATCHER_MESSAGE_MISSING_2 = Messages
-				.getString("TaskDispatcher.message.missing.2");
+		THREADPOOL_SUCCESS_MESSAGE = Messages.getString("ThreadPool.message.success");
+		THREADPOOL_ERROR_MESSAGE = Messages.getString("ThreadPool.message.error");
+		READCSVFILETASK_MESSAGE_NEW = Messages.getString("ReadCsvFileTask.message.new");
+		READCSVFILETASK_CSV_CHARSET = Messages.getString("ReadCsvFileTask.csv.charset");
+		READCSVFILETASK_CSV_DEIMITER = Messages.getString("ReadCsvFileTask.csv.deimiter");
+		READCSVFILETASK_ERROR_INVALID = Messages.getString("ReadCsvFileTask.error.invalid");
+		READCSVFILETASK_MESSAGE_FAIL = Messages.getString("ReadCsvFileTask.message.fail");
+		READHEADERFILETASK_MESSAGE_NEW = Messages.getString("ReadHeaderFileTask.message.new");
+		READHEADERFILETASK_MESSAGE_COPY = Messages.getString("ReadHeaderFileTask.message.copy");
+		READXLSXFILETASK_MESSAGE_NEW = Messages.getString("ReadXlsxFileTask.message.new");
+		READXLSXFILETASK_MESSAGE_FAIL = Messages.getString("ReadXlsxFileTask.message.fail");
+		TASKDISPATCHER_MESSAGE_SUBMIT = Messages.getString("TaskDispatcher.message.submit");
+		TASKDISPATCHER_MESSAGE_FINISHED = Messages.getString("TaskDispatcher.message.finished");
+		TASKDISPATCHER_MESSAGE_MISSING_1 = Messages.getString("TaskDispatcher.message.missing.1");
+		TASKDISPATCHER_MESSAGE_MISSING_2 = Messages.getString("TaskDispatcher.message.missing.2");
 
-		TASKDISPATCHER_MESSAGE_ILLEGAL_1 = Messages
-				.getString("TaskDispatcher.message.illegal.1");
-		TASKDISPATCHER_MESSAGE_ILLEGAL_2 = Messages
-				.getString("TaskDispatcher.message.illegal.2");
+		TASKDISPATCHER_MESSAGE_ILLEGAL_1 = Messages.getString("TaskDispatcher.message.illegal.1");
+		TASKDISPATCHER_MESSAGE_ILLEGAL_2 = Messages.getString("TaskDispatcher.message.illegal.2");
 
-		TASKDISPATCHER_MESSAGE_ANY = Messages
-				.getString("TaskDispatcher.message.any");
-		TASKDISPATCHER_MESSAGE_COLLECT = Messages
-				.getString("TaskDispatcher.message.collect");
-		TASKDISPATCHER_MESSAGE_SUCCESS = Messages
-				.getString("TaskDispatcher.message.success");
+		TASKDISPATCHER_MESSAGE_ANY = Messages.getString("TaskDispatcher.message.any");
+		TASKDISPATCHER_MESSAGE_COLLECT = Messages.getString("TaskDispatcher.message.collect");
+		TASKDISPATCHER_MESSAGE_SUCCESS = Messages.getString("TaskDispatcher.message.success");
 		CREATE_TASKS = Messages.getString("TaskFactory.create.tasks");
 		BUILD_TASKS = Messages.getString("TaskFactory.build.tasks");
 		ERROR_INSTANCE = Messages.getString("TaskFactory.error.instance");
@@ -257,18 +226,17 @@ public enum Configuration {
 		STORE_BTN_NAME = Messages.getString("MainWindow.store.btn.name");
 		SHOP_BTN_NAME = Messages.getString("MainWindow.shop.btn.name");
 		FONT_NAME = Messages.getString("MainWindow.font.name");
+		XLSX_CELL_KEY_INDEX = Messages.getString("xlsx.cell_key.index");
+		XLSX_START_FROM = Messages.getString("xlsx.start.from");
+		XLSX_NUMBER_FORMAT_ERROR = Messages.getString("xlsx.number.format.error");
+		XLSX_HEADER_ROW_COUNT= Messages.getString("xlsx.header.row.count");
+		XLSX_HEADER_START_FROM = Messages.getString("xlsx.header.start.from");
+		
 	}
 
 	public static Configuration getInstance() {
 		LOGGER = ApplicationLogger.INSTANCE.getLogger(Configuration.class);
-		LOGGER.info(BTN_EXIT);
-		LOGGER.info(BTN_MERGE);
-		LOGGER.info(BTN_OPEN);
-		LOGGER.info(CANCEL_FILE_SELECTION);
-		LOGGER.info(FILE_READ_ERROR_CAPTION);
-		LOGGER.info(LBL_STORE);
-		LOGGER.info(LBL_SHOP);
-		LOGGER.info(NEW_LINE);
+		LOGGER.info("Configuration instance created.");
 		return INSTANCE;
 	}
 }

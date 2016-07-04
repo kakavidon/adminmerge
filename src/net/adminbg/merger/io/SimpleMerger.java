@@ -17,14 +17,14 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import net.adminbg.merger.logging.ApplicationLogger;
-
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+import net.adminbg.merger.logging.ApplicationLogger;
 
 /**
  * 
@@ -51,7 +51,7 @@ public class SimpleMerger extends Merger {
 
 	@Override
 	public void merge() throws MergeException {
-		try (final XSSFWorkbook book = new XSSFWorkbook();
+			try (final XSSFWorkbook book = new XSSFWorkbook();
 				final OutputStream out = Files.newOutputStream(getTargetFile());) {
 			@SuppressWarnings("unchecked")
 			final Map<String, String> firstDirRows = (Map<String, String>) getFirstDirRows();

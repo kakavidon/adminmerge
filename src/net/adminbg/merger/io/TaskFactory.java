@@ -44,8 +44,7 @@ final public class TaskFactory {
 		private static final TaskFactory INSTANCE = new TaskFactory();
 	}
 
-	public List<FileTask<?, ?>> createTasks(final Set<SelectionInfo> selection)
-			throws MergeException {
+	public List<FileTask<?, ?>> createTasks(final Set<SelectionInfo> selection) throws MergeException {
 
 		LOGGER.info(CREATE_TASKS);
 
@@ -61,8 +60,8 @@ final public class TaskFactory {
 		return newTasks;
 	}
 
-	private List<FileTask<?, ?>> buildTasks(final Path directory,
-			final String className, final String ext) throws MergeException {
+	private List<FileTask<?, ?>> buildTasks(final Path directory, final String className, final String ext)
+			throws MergeException {
 		final List<FileTask<?, ?>> localTasks = new ArrayList<>();
 		LOGGER.log(Level.INFO, BUILD_TASKS, directory);
 		try {
@@ -74,10 +73,8 @@ final public class TaskFactory {
 				localTasks.add((FileTask<?, ?>) constructor.newInstance(file));
 			}
 
-		} catch (ClassNotFoundException | InstantiationException
-				| IllegalAccessException | NoSuchMethodException
-				| SecurityException | IllegalArgumentException
-				| InvocationTargetException ex) {
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException
+				| SecurityException | IllegalArgumentException | InvocationTargetException ex) {
 			final String msg = String.format(ERROR_INSTANCE, className);
 			LOGGER.log(Level.SEVERE, msg, ex);
 			throw new MergeException(ex);
@@ -118,8 +115,7 @@ final public class TaskFactory {
 		final int size = tasks.size() + 1;
 		final int percentDone = total / size;
 		int reminder = total - percentDone * size;
-		LOGGER.log(Level.INFO, PROGRESS, new Object[] { percentDone,
-				percentDone * size });
+		LOGGER.log(Level.INFO, PROGRESS, new Object[] { percentDone, percentDone * size });
 
 		for (FileTask<?, ?> task : tasks) {
 			task.setPercentDone(percentDone);
@@ -130,7 +126,7 @@ final public class TaskFactory {
 		LOGGER.log(Level.INFO, TASK, lastTask.getPercentDone());
 	}
 
-	public void setHeaderTask(List<FileTask<?, ?>> tasks) {
+	public void setHeaderTask() throws MergeException {
 		LOGGER.info(HEADER);
 		final Path excelFile = getExcelFile();
 		tasks.add(new ReadHeaderFileTask(excelFile));

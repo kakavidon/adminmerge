@@ -5,17 +5,32 @@
  */
 package net.adminbg.merger.ui;
 
+import static net.adminbg.merger.ui.Configuration.BTN_EXIT;
+import static net.adminbg.merger.ui.Configuration.BTN_MERGE;
+import static net.adminbg.merger.ui.Configuration.BTN_OPEN;
 import static net.adminbg.merger.ui.Configuration.CANCEL_FILE_SELECTION;
+import static net.adminbg.merger.ui.Configuration.DATE_FORMAT;
+import static net.adminbg.merger.ui.Configuration.DIALOG_CAPTION;
+import static net.adminbg.merger.ui.Configuration.ERROR_CAPTION;
+import static net.adminbg.merger.ui.Configuration.FILE_PATTERN;
+import static net.adminbg.merger.ui.Configuration.FINAL_MESSAGE;
+import static net.adminbg.merger.ui.Configuration.FINISHED;
+import static net.adminbg.merger.ui.Configuration.FONT_NAME;
+import static net.adminbg.merger.ui.Configuration.MEGRE_END;
+import static net.adminbg.merger.ui.Configuration.MESSAGE_FAIL;
 import static net.adminbg.merger.ui.Configuration.NEW_LINE;
+import static net.adminbg.merger.ui.Configuration.PROGRESS_DONE;
+import static net.adminbg.merger.ui.Configuration.READING_FILE;
+import static net.adminbg.merger.ui.Configuration.SHOP_BTN_NAME;
 import static net.adminbg.merger.ui.Configuration.SHOP_EXT;
 import static net.adminbg.merger.ui.Configuration.SHOP_TASK_CLASS;
+import static net.adminbg.merger.ui.Configuration.STORE_BTN_NAME;
 import static net.adminbg.merger.ui.Configuration.STORE_EXT;
 import static net.adminbg.merger.ui.Configuration.STORE_TASK_CLASS;
 import static net.adminbg.merger.ui.Configuration.TEXTAREA_LOG_MESSAGE_SHOP;
 import static net.adminbg.merger.ui.Configuration.TEXTAREA_LOG_MESSAGE_STORE;
+import static net.adminbg.merger.ui.Configuration.TIME_ELAPSED;
 import static net.adminbg.merger.ui.Configuration.UI_STYLE;
-import static net.adminbg.merger.ui.Configuration.MEGRE_END;
-import static net.adminbg.merger.ui.Configuration.*;
 
 import java.awt.Cursor;
 import java.awt.HeadlessException;
@@ -56,15 +71,14 @@ import net.adminbg.merger.logging.ApplicationLogger;
 public class MainWindow extends javax.swing.JPanel implements TaskListener {
 
 	/**
-     *
-     */
+	 *
+	 */
 	private static final long serialVersionUID = 464314710332456958L;
 	private JFrame frame;
 	private final Map<String, String> directories = new TreeMap<>();
 	private final Map<String, SelectionInfo> selection = new TreeMap<>();
 	private final TaskComponent taskComponent;
-	private static final Logger LOGGER = ApplicationLogger.INSTANCE
-			.getLogger(MainWindow.class);
+	private static final Logger LOGGER = ApplicationLogger.INSTANCE.getLogger(MainWindow.class);
 
 	/**
 	 * Creates new form MainWindow
@@ -102,7 +116,7 @@ public class MainWindow extends javax.swing.JPanel implements TaskListener {
 		outputArea.setColumns(20);
 		outputArea.setRows(5);
 		outputArea.setFocusable(false);
-		outputArea.setOpaque(false);
+		outputArea.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 		outputArea.setRequestFocusEnabled(false);
 		jScrollPane1.setViewportView(outputArea);
 
@@ -136,7 +150,7 @@ public class MainWindow extends javax.swing.JPanel implements TaskListener {
 				storeButtonActionPerformed(evt);
 			}
 		});
-		shopButton.setName(SHOP_BTN_NAME); //$NON-NLS-1$
+		shopButton.setName(SHOP_BTN_NAME); // $NON-NLS-1$
 		shopButton.setText(Configuration.BTN_OPEN); // NOI18N
 		shopButton.setMaximumSize(new java.awt.Dimension(28, 28));
 		shopButton.setMinimumSize(new java.awt.Dimension(28, 28));
@@ -156,146 +170,74 @@ public class MainWindow extends javax.swing.JPanel implements TaskListener {
 		shopText.setFocusable(false);
 		shopText.setRequestFocusEnabled(false);
 
-		storeLabel.setFont(new java.awt.Font(FONT_NAME, 1, 15)); // NOI18N //$NON-NLS-1$
+		storeLabel.setFont(new java.awt.Font(FONT_NAME, 1, 15)); // NOI18N
+																	// //$NON-NLS-1$
 		storeLabel.setText(Configuration.LBL_STORE); // NOI18N
 
-		storeLabel1.setFont(new java.awt.Font(FONT_NAME, 1, 15)); // NOI18N //$NON-NLS-1$
+		storeLabel1.setFont(new java.awt.Font(FONT_NAME, 1, 15)); // NOI18N
+																	// //$NON-NLS-1$
 		storeLabel1.setText(Configuration.LBL_SHOP); // NOI18N
 
 		javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
 		this.setLayout(layout);
-		layout.setHorizontalGroup(layout
-				.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-				.addGroup(
-						layout.createSequentialGroup()
-								.addContainerGap()
-								.addGroup(
-										layout.createParallelGroup(
-												javax.swing.GroupLayout.Alignment.LEADING)
-												.addComponent(jScrollPane1)
-												.addGroup(
-														layout.createSequentialGroup()
-																.addComponent(
-																		mergeButton,
-																		javax.swing.GroupLayout.PREFERRED_SIZE,
-																		72,
-																		javax.swing.GroupLayout.PREFERRED_SIZE)
-																.addPreferredGap(
-																		javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-																.addComponent(
-																		progressBar,
-																		javax.swing.GroupLayout.DEFAULT_SIZE,
-																		327,
-																		Short.MAX_VALUE)
-																.addPreferredGap(
-																		javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-																.addComponent(
-																		exitButton,
-																		javax.swing.GroupLayout.PREFERRED_SIZE,
-																		65,
-																		javax.swing.GroupLayout.PREFERRED_SIZE))
-												.addGroup(
-														layout.createSequentialGroup()
-																.addGroup(
-																		layout.createParallelGroup(
-																				javax.swing.GroupLayout.Alignment.LEADING)
-																				.addComponent(
-																						storeLabel)
-																				.addComponent(
-																						storeLabel1))
-																.addGap(0,
-																		0,
-																		Short.MAX_VALUE))
-												.addGroup(
-														javax.swing.GroupLayout.Alignment.TRAILING,
-														layout.createSequentialGroup()
-																.addGroup(
-																		layout.createParallelGroup(
-																				javax.swing.GroupLayout.Alignment.TRAILING)
-																				.addComponent(
-																						storeText)
-																				.addComponent(
-																						shopText))
-																.addPreferredGap(
-																		javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-																.addGroup(
-																		layout.createParallelGroup(
-																				javax.swing.GroupLayout.Alignment.LEADING)
-																				.addComponent(
-																						shopButton,
-																						javax.swing.GroupLayout.Alignment.TRAILING,
-																						javax.swing.GroupLayout.PREFERRED_SIZE,
-																						javax.swing.GroupLayout.DEFAULT_SIZE,
-																						javax.swing.GroupLayout.PREFERRED_SIZE)
-																				.addComponent(
-																						storeButton,
-																						javax.swing.GroupLayout.Alignment.TRAILING,
-																						javax.swing.GroupLayout.PREFERRED_SIZE,
-																						javax.swing.GroupLayout.DEFAULT_SIZE,
-																						javax.swing.GroupLayout.PREFERRED_SIZE))))
-								.addContainerGap()));
-		layout.setVerticalGroup(layout
-				.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-				.addGroup(
-						javax.swing.GroupLayout.Alignment.TRAILING,
-						layout.createSequentialGroup()
-								.addContainerGap()
-								.addComponent(storeLabel)
-								.addPreferredGap(
-										javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-								.addGroup(
-										layout.createParallelGroup(
-												javax.swing.GroupLayout.Alignment.BASELINE)
-												.addComponent(
-														storeText,
-														javax.swing.GroupLayout.PREFERRED_SIZE,
-														javax.swing.GroupLayout.DEFAULT_SIZE,
-														javax.swing.GroupLayout.PREFERRED_SIZE)
-												.addComponent(
-														storeButton,
-														javax.swing.GroupLayout.PREFERRED_SIZE,
-														javax.swing.GroupLayout.DEFAULT_SIZE,
-														javax.swing.GroupLayout.PREFERRED_SIZE))
-								.addPreferredGap(
-										javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-								.addComponent(storeLabel1)
-								.addPreferredGap(
-										javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-								.addGroup(
-										layout.createParallelGroup(
-												javax.swing.GroupLayout.Alignment.BASELINE)
-												.addComponent(
-														shopText,
-														javax.swing.GroupLayout.PREFERRED_SIZE,
-														javax.swing.GroupLayout.DEFAULT_SIZE,
-														javax.swing.GroupLayout.PREFERRED_SIZE)
-												.addComponent(
-														shopButton,
-														javax.swing.GroupLayout.PREFERRED_SIZE,
-														javax.swing.GroupLayout.DEFAULT_SIZE,
-														javax.swing.GroupLayout.PREFERRED_SIZE))
-								.addPreferredGap(
-										javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-								.addComponent(jScrollPane1,
-										javax.swing.GroupLayout.DEFAULT_SIZE,
-										232, Short.MAX_VALUE)
-								.addGap(4, 4, 4)
-								.addGroup(
-										layout.createParallelGroup(
-												javax.swing.GroupLayout.Alignment.LEADING)
-												.addComponent(
-														exitButton,
-														javax.swing.GroupLayout.PREFERRED_SIZE,
-														javax.swing.GroupLayout.DEFAULT_SIZE,
-														javax.swing.GroupLayout.PREFERRED_SIZE)
-												.addComponent(mergeButton)
-												.addComponent(
-														progressBar,
-														javax.swing.GroupLayout.Alignment.TRAILING,
-														javax.swing.GroupLayout.PREFERRED_SIZE,
-														javax.swing.GroupLayout.DEFAULT_SIZE,
-														javax.swing.GroupLayout.PREFERRED_SIZE))
-								.addContainerGap()));
+		layout.setHorizontalGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+				.addGroup(layout.createSequentialGroup().addContainerGap()
+						.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+								.addComponent(jScrollPane1)
+								.addGroup(layout.createSequentialGroup()
+										.addComponent(mergeButton, javax.swing.GroupLayout.PREFERRED_SIZE, 72,
+												javax.swing.GroupLayout.PREFERRED_SIZE)
+										.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+										.addComponent(progressBar, javax.swing.GroupLayout.DEFAULT_SIZE, 327,
+												Short.MAX_VALUE)
+								.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+								.addComponent(exitButton, javax.swing.GroupLayout.PREFERRED_SIZE, 65,
+										javax.swing.GroupLayout.PREFERRED_SIZE))
+						.addGroup(layout.createSequentialGroup()
+								.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+										.addComponent(storeLabel).addComponent(storeLabel1))
+								.addGap(0, 0, Short.MAX_VALUE))
+						.addGroup(javax.swing.GroupLayout.Alignment.TRAILING,
+								layout.createSequentialGroup()
+										.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+												.addComponent(storeText).addComponent(shopText))
+								.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+								.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+										.addComponent(shopButton, javax.swing.GroupLayout.Alignment.TRAILING,
+												javax.swing.GroupLayout.PREFERRED_SIZE,
+												javax.swing.GroupLayout.DEFAULT_SIZE,
+												javax.swing.GroupLayout.PREFERRED_SIZE)
+										.addComponent(storeButton, javax.swing.GroupLayout.Alignment.TRAILING,
+												javax.swing.GroupLayout.PREFERRED_SIZE,
+												javax.swing.GroupLayout.DEFAULT_SIZE,
+												javax.swing.GroupLayout.PREFERRED_SIZE))))
+						.addContainerGap()));
+		layout.setVerticalGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+				.addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup().addContainerGap()
+						.addComponent(storeLabel).addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+						.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+								.addComponent(storeText, javax.swing.GroupLayout.PREFERRED_SIZE,
+										javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+								.addComponent(storeButton, javax.swing.GroupLayout.PREFERRED_SIZE,
+										javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+						.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED).addComponent(storeLabel1)
+						.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+						.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+								.addComponent(shopText, javax.swing.GroupLayout.PREFERRED_SIZE,
+										javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+								.addComponent(shopButton, javax.swing.GroupLayout.PREFERRED_SIZE,
+										javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+						.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+						.addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 232, Short.MAX_VALUE)
+						.addGap(4, 4, 4)
+						.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+								.addComponent(exitButton, javax.swing.GroupLayout.PREFERRED_SIZE,
+										javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+								.addComponent(mergeButton).addComponent(progressBar,
+										javax.swing.GroupLayout.Alignment.TRAILING,
+										javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE,
+										javax.swing.GroupLayout.PREFERRED_SIZE))
+						.addContainerGap()));
 	}// </editor-fold>//GEN-END:initComponents
 
 	private void exitButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_exitButtonActionPerformed
@@ -305,8 +247,7 @@ public class MainWindow extends javax.swing.JPanel implements TaskListener {
 
 	private void storeButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_storeButtonActionPerformed
 		final JFileChooser fileChooser = new JFileChooser();
-		fileChooser.setCurrentDirectory(new File(
-				"C:\\Users\\Lachezar.Nedelchev\\git\\adminmerge\\store")); //$NON-NLS-1$
+		fileChooser.setCurrentDirectory(new File("C:\\Users\\Lachezar.Nedelchev\\git\\adminmerge\\store")); //$NON-NLS-1$
 		fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		int returnVal = fileChooser.showOpenDialog(this);
 		final String previousDir = storeText.getText();
@@ -315,8 +256,7 @@ public class MainWindow extends javax.swing.JPanel implements TaskListener {
 			final String fileName = file.getAbsolutePath();
 			storeText.setText(fileName);
 			storeText.setEnabled(false);
-			final SelectionInfo selectionInfo = new SelectionInfo(
-					Paths.get(fileName), STORE_EXT, STORE_TASK_CLASS);
+			final SelectionInfo selectionInfo = new SelectionInfo(Paths.get(fileName), STORE_EXT, STORE_TASK_CLASS);
 			final String sender = ((JButton) evt.getSource()).getName();
 			selection.remove(sender);
 			selection.put(sender, selectionInfo);
@@ -336,8 +276,7 @@ public class MainWindow extends javax.swing.JPanel implements TaskListener {
 
 		final JFileChooser fileChooser = new JFileChooser();
 		// fileChooser.setCurrentDirectory(new File(".\\shop"));
-		fileChooser.setSelectedFile(new File(
-				"C:\\Users\\Lachezar.Nedelchev\\git\\adminmerge\\shop")); //$NON-NLS-1$
+		fileChooser.setSelectedFile(new File("C:\\Users\\Lachezar.Nedelchev\\git\\adminmerge\\shop")); //$NON-NLS-1$
 		fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		int returnVal = fileChooser.showOpenDialog(this);
 		final String previousDir = shopText.getText();
@@ -345,8 +284,7 @@ public class MainWindow extends javax.swing.JPanel implements TaskListener {
 			File file = fileChooser.getSelectedFile();
 			final String fileName = file.getAbsolutePath();
 			shopText.setText(fileName);
-			final SelectionInfo selectionInfo = new SelectionInfo(
-					Paths.get(fileName), SHOP_EXT, SHOP_TASK_CLASS);
+			final SelectionInfo selectionInfo = new SelectionInfo(Paths.get(fileName), SHOP_EXT, SHOP_TASK_CLASS);
 			final String sender = ((JButton) evt.getSource()).getName();
 			selection.remove(sender);
 			selection.put(sender, selectionInfo);
@@ -404,16 +342,14 @@ public class MainWindow extends javax.swing.JPanel implements TaskListener {
 	public void start() {
 		try {
 			LOGGER.setLevel(Level.SEVERE);
-			for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager
-					.getInstalledLookAndFeels()) {
+			for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
 				if (UI_STYLE.equals(info.getName())) {
 					javax.swing.UIManager.setLookAndFeel(info.getClassName());
 					break;
 				}
 			}
 
-		} catch (ClassNotFoundException | InstantiationException
-				| IllegalAccessException
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
 				| javax.swing.UnsupportedLookAndFeelException ex) {
 			LOGGER.log(Level.SEVERE, null, ex);
 		}
@@ -458,36 +394,38 @@ public class MainWindow extends javax.swing.JPanel implements TaskListener {
 	}
 
 	public void printTask(FileTask<?, ?> fileTask) {
-		final String message = READING_FILE + fileTask.getFile().toString()
-				+ FINISHED;
+		final String message = READING_FILE + fileTask.getFile().toString() + FINISHED;
 		outputArea.append(message + NEW_LINE);
 	}
 
 	private void merge(final Path targetFile) throws MergeException {
 		final long start = System.nanoTime();
-		mergeButton.setEnabled(false);
-		progressBar.setValue(0);
-		progressBar.repaint();
-		frame.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-		SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+		SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() /*
+																		 * implements
+																		 * TaskListener
+																		 */ {
 			private Throwable exception = null;
 
 			@Override
 			protected Void doInBackground() throws Exception {
-
+				mergeButton.setEnabled(false);
+				mergeButton.repaint();
+				progressBar.setValue(0);
+				progressBar.repaint();
+				frame.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+				outputArea.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+				frame.repaint();
 				int progress = 0;
 				final TaskDispatcher dipatcher = TaskDispatcher.INSTANCE;
 				final Collection<SelectionInfo> values = selection.values();
-				final TreeSet<SelectionInfo> copy = new TreeSet<SelectionInfo>(
-						values);
+				final TreeSet<SelectionInfo> copy = new TreeSet<SelectionInfo>(values);
 				dipatcher.setSelection(copy);
 				dipatcher.setTargetFile(targetFile);
 
 				try {
 					dipatcher.parseDirectories();
-					List<Future<FileTask<?, ?>>> results = dipatcher
-							.execute(taskComponent);
+					List<Future<FileTask<?, ?>>> results = dipatcher.execute(taskComponent);
 
 					setProgress(0);
 
@@ -511,8 +449,7 @@ public class MainWindow extends javax.swing.JPanel implements TaskListener {
 					dipatcher.mergeFiles(finishedTasks);
 					LOGGER.info(MEGRE_END);
 
-				} catch (IllegalArgumentException
-						| UnsupportedOperationException | MergeException e) {
+				} catch (IllegalArgumentException | UnsupportedOperationException | MergeException e) {
 					LOGGER.log(Level.SEVERE, e.getMessage(), e);
 					showError(e);
 					exception = e;
@@ -532,13 +469,15 @@ public class MainWindow extends javax.swing.JPanel implements TaskListener {
 
 				}
 				selection.clear();
+				frame.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+				outputArea.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+				mergeButton.setEnabled(true);
 			}
+
 		};
 
 		worker.execute();
 
-		frame.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-		mergeButton.setEnabled(true);
 		final long end = System.nanoTime();
 		LOGGER.log(Level.INFO, TIME_ELAPSED, (end - start) / 1000);
 
@@ -546,8 +485,7 @@ public class MainWindow extends javax.swing.JPanel implements TaskListener {
 
 	protected void showError(Throwable e) throws HeadlessException {
 		String msg = e.getMessage().replaceAll(":", "\n");
-		JOptionPane.showMessageDialog(frame, msg, DIALOG_CAPTION,
-				JOptionPane.ERROR_MESSAGE);
+		JOptionPane.showMessageDialog(frame, msg, DIALOG_CAPTION, JOptionPane.ERROR_MESSAGE);
 		mergeButton.setEnabled(true);
 		progressBar.setValue(0);
 		outputArea.append(MESSAGE_FAIL);
@@ -555,11 +493,12 @@ public class MainWindow extends javax.swing.JPanel implements TaskListener {
 
 	@Override
 	public void percentDone(final TaskEvent taskEvent) {
-		final int newValue = Math.min(
-				progressBar.getValue() + taskEvent.getProgress(), 100);
-		outputArea.append(taskEvent.getMessage() + "\n"); //$NON-NLS-1$
+		final int progress = taskEvent.getProgress();
+		final int newValue = Math.min(progressBar.getValue() + progress, 100);
+		outputArea.append(taskEvent.getMessage() + NEW_LINE);
 		progressBar.setValue(newValue);
 		progressBar.repaint();
+
 	}
 
 }

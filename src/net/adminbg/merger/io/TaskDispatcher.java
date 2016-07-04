@@ -89,7 +89,7 @@ public enum TaskDispatcher {
 		final TaskFactory taskFactory = TaskFactory.getInstance();
 
 		final List<FileTask<?, ?>> tasks = taskFactory.createTasks(selection);
-		taskFactory.setHeaderTask(tasks);
+		taskFactory.setHeaderTask();
 		taskFactory.setPercentage();
 		final int size = taskFactory.counTasks();
 		LOGGER.info(String.format(TASKDISPATCHER_MESSAGE_SUBMIT, size));

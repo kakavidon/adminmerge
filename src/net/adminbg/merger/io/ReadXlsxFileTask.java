@@ -2,6 +2,9 @@ package net.adminbg.merger.io;
 
 import static net.adminbg.merger.ui.Configuration.READXLSXFILETASK_MESSAGE_FAIL;
 import static net.adminbg.merger.ui.Configuration.READXLSXFILETASK_MESSAGE_NEW;
+import static net.adminbg.merger.ui.Configuration.XLSX_CELL_KEY_INDEX;
+import static net.adminbg.merger.ui.Configuration.XLSX_START_FROM;
+import static net.adminbg.merger.ui.Configuration.XLSX_NUMBER_FORMAT_ERROR;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,8 +14,6 @@ import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import net.adminbg.merger.logging.ApplicationLogger;
-
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
@@ -20,6 +21,8 @@ import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+import net.adminbg.merger.logging.ApplicationLogger;
 
 /**
  * 
@@ -31,17 +34,23 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
  */
 public class ReadXlsxFileTask extends FileTask<String, XSSFRow> {
 	private static final ApplicationLogger appLog = ApplicationLogger.INSTANCE;
-	private static final Logger LOGGER = appLog
-			.getLogger(ReadXlsxFileTask.class);
+	private static final Logger LOGGER = appLog.getLogger(ReadXlsxFileTask.class);
 
-	private final int START_FROM = 1;
-	private final int CELL_KEY_INDEX = 3;
+	private int START_FROM;
+	private int CELL_KEY_INDEX;
 
 	private final Map<String, XSSFRow> map = new TreeMap<>();
 
-	public ReadXlsxFileTask(final Path file) {
+	public ReadXlsxFileTask(final Path file) throws MergeException {
 		super(file);
 		LOGGER.log(Level.INFO, READXLSXFILETASK_MESSAGE_NEW);
+		try {
+			START_FROM = Integer.valueOf(XLSX_START_FROM);
+			CELL_KEY_INDEX = Integer.valueOf(XLSX_CELL_KEY_INDEX);
+		} catch (NumberFormatException e) {
+			LOGGER.log(Level.SEVERE, XLSX_NUMBER_FORMAT_ERROR, e);
+			throw new MergeException(e);
+		}
 	}
 
 	@Override
@@ -54,8 +63,7 @@ public class ReadXlsxFileTask extends FileTask<String, XSSFRow> {
 		int rIndex = 0;
 
 		final File file = getFile().toFile();
-		try (final XSSFWorkbook xlsx = (XSSFWorkbook) WorkbookFactory
-				.create(file);) {
+		try (final XSSFWorkbook xlsx = (XSSFWorkbook) WorkbookFactory.create(file);) {
 			final XSSFSheet sheet = xlsx.getSheetAt(0);
 			for (int rowIndex = START_FROM; rowIndex < sheet.getLastRowNum(); rowIndex++) {
 				final XSSFRow row = sheet.getRow(rowIndex);
@@ -72,8 +80,7 @@ public class ReadXlsxFileTask extends FileTask<String, XSSFRow> {
 			}
 
 		} catch (IOException | IllegalStateException | InvalidFormatException e) {
-			LOGGER.log(Level.SEVERE, READXLSXFILETASK_MESSAGE_FAIL,
-					new Object[] { getFile().toString(), rIndex });
+			LOGGER.log(Level.SEVERE, READXLSXFILETASK_MESSAGE_FAIL, new Object[] { getFile().toString(), rIndex });
 			throw new MergeException(e);
 		}
 		return this;
